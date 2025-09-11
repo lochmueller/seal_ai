@@ -24,11 +24,11 @@ class AiIndexer implements IndexerInterface
     public function save(Index $index, array $document, array $options = []): TaskInterface|null
     {
         $this->delete($index, $document['id']);
-        $this->aiBridge->getIndexer()->index(new TextDocument(
+        $this->aiBridge->getIndexer()->withSource([new TextDocument(
             id: Uuid::v4(),
             content: $document['title'] . ' ' . $document['content'],
             metadata: new Metadata($document),
-        ));
+        )])->index();
 
         return new SyncTask(null);
     }

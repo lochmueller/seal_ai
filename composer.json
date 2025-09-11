@@ -21,8 +21,8 @@
     "php": "^8.3",
     "typo3/cms-core": "^13.4",
     "lochmueller/seal": "0.0.2",
-    "symfony/ai-platform": "dev-main#c32143f902681128abc115d2264236b83811b8cb as 0.0.1",
-    "symfony/ai-store": "dev-main#955aafd0ba85e3635aa6c8de9c3dab44397c07d5 as 0.0.1"
+    "symfony/ai-platform": "dev-main#ddb15e9eab8213f8e66f2d3e42952d6f1105b5d8 as 0.0.1",
+    "symfony/ai-store": "dev-main#557c02a1cc8c6ba5b06cf0b35232028e3ada8f0b as 0.0.1"
   },
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^3.84"

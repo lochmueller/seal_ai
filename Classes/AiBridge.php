@@ -8,6 +8,7 @@ use Symfony\AI\Platform\Bridge\Gemini\Embeddings;
 use Symfony\AI\Platform\Bridge\Gemini\Embeddings\TaskType;
 use Symfony\AI\Platform\Bridge\Gemini\PlatformFactory;
 use Symfony\AI\Store\Bridge\MariaDb\Store;
+use Symfony\AI\Store\Document\Loader\InMemoryLoader;
 use Symfony\AI\Store\Document\Vectorizer;
 use Symfony\AI\Store\Indexer;
 use Symfony\AI\Store\ManagedStoreInterface;
@@ -68,7 +69,7 @@ class AiBridge
         $platform = PlatformFactory::create($this->getApiKey(), new CurlHttpClient());
         $embeddings = new Embeddings(Embeddings::TEXT_EMBEDDING_004, options: ['dimensions' => $this->getDimensions(), 'task_type' => TaskType::SemanticSimilarity]);
         $this->vectorizer = new Vectorizer($platform, $embeddings);
-        $this->indexer = new Indexer($this->vectorizer, $this->store);
+        $this->indexer = new Indexer(new InMemoryLoader(), $this->vectorizer, $this->store);
     }
 
     public function getTableName(): string
