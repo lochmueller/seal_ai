@@ -10,7 +10,6 @@ use Symfony\AI\Platform\Bridge\Gemini\PlatformFactory;
 use Symfony\AI\Store\Bridge\MariaDb\Store;
 use Symfony\AI\Store\Document\Loader\InMemoryLoader;
 use Symfony\AI\Store\Document\Vectorizer;
-use Symfony\AI\Store\Indexer;
 use Symfony\AI\Store\ManagedStoreInterface;
 use Symfony\AI\Store\StoreInterface;
 use Symfony\Component\HttpClient\CurlHttpClient;
@@ -22,8 +21,6 @@ class AiBridge
     protected StoreInterface&ManagedStoreInterface $store;
 
     protected Vectorizer $vectorizer;
-
-    protected Indexer $indexer;
 
     protected array $dsn;
 
@@ -41,17 +38,11 @@ class AiBridge
         return $this->vectorizer;
     }
 
-    public function getIndexer(): Indexer
-    {
-        return $this->indexer;
-    }
-
-
     public function initialize(array $dsn)
     {
         $this->dsn = $dsn;
         $this->initializeStore();
-        $this->initializeIndexer();
+        $this->initializeVectorizer();
     }
 
     public function initializeStore(): void
@@ -64,12 +55,11 @@ class AiBridge
         $this->store->setup(['dimensions' => $this->getDimensions()]);
     }
 
-    public function initializeIndexer(): void
+    public function initializeVectorizer(): void
     {
         $platform = PlatformFactory::create($this->getApiKey(), new CurlHttpClient());
         $embeddings = new Embeddings(Embeddings::TEXT_EMBEDDING_004, options: ['dimensions' => $this->getDimensions(), 'task_type' => TaskType::SemanticSimilarity]);
         $this->vectorizer = new Vectorizer($platform, $embeddings);
-        $this->indexer = new Indexer(new InMemoryLoader(), $this->vectorizer, $this->store);
     }
 
     public function getTableName(): string
