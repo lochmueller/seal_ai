@@ -55,6 +55,7 @@ class AiBridge
 
     public function initializeStore(): void
     {
+        // @todo Switch to DSN
         $typo3Connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('tt_content');
         $this->store = Store::fromDbal(
             connection: $typo3Connection,
@@ -65,6 +66,7 @@ class AiBridge
 
     public function initializeIndexer(): void
     {
+        // @todo Switch to Platform
         $platform = PlatformFactory::create($this->getApiKey(), new CurlHttpClient());
         $embeddings = new Embeddings(Embeddings::TEXT_EMBEDDING_004, options: ['dimensions' => $this->getDimensions(), 'task_type' => TaskType::SemanticSimilarity]);
         $this->vectorizer = new Vectorizer($platform, $embeddings);

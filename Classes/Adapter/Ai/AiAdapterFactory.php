@@ -21,7 +21,7 @@ class AiAdapterFactory implements AdapterFactoryInterface
 
     public function createAdapter(array $dsn): AdapterInterface
     {
-        $this->aiBridge->initialize($dsn);
+        $this->aiBridge->initialize($dsn); // @todo get access to site configuration
         return $this->adapter;
     }
 }

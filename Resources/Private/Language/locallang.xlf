@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+    <file source-language="en" datatype="plaintext" original="messages" date="2013-09-19T09:11:39Z"
+          product-name="seal">
+        <header/>
+        <body>
+            <trans-unit id="site.sealAiPlatformDsn">
+                <source>AI Platform DSN</source>
+            </trans-unit>
+            <trans-unit id="site.sealAiPlatformDsn.description">
+                <source>Configure the AI platform via DSN. Examples are https://github.com/symfony/ai/issues/402</source>
+            </trans-unit>
+            <trans-unit id="site.sealAiStoreDsn">
+                <source>AI Store DSN</source>
+            </trans-unit>
+            <trans-unit id="site.sealAiStoreDsn.description">
+                <source>Configure the AI store via DSN. Examples are (@todo)</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

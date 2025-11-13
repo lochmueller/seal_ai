@@ -46,6 +46,8 @@ class AiSearcher implements SearcherInterface
             'limit' => $search->limit ?? 10,
         ]);
 
+        // @todo add relevant configuration cut
+
         return new Result((function () use ($result) {
             foreach ($result as $item) {
                 /** @var $item VectorDocument */
