@@ -39,7 +39,7 @@ class AiSearcher implements SearcherInterface
             ),
         ];
 
-        $vectorDocuments = $this->aiBridge->getVectorizer()->vectorizeDocuments($documents);
+        $vectorDocuments = $this->aiBridge->getVectorizer()->vectorizeTextDocuments($documents);
 
         $vectorDocument = $vectorDocuments[0];
         $result = $this->aiBridge->getStore()->query($vectorDocument->vector, [
