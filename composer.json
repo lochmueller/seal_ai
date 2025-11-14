@@ -17,6 +17,11 @@
       "Lochmueller\\SealAi\\": "Classes/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Lochmueller\\SealAi\\Tests\\": "Tests/"
+    }
+  },
   "require": {
     "php": "^8.3",
     "typo3/cms-core": "^13.4",
@@ -25,6 +30,7 @@
     "symfony/ai-store": "dev-main#bd0c539fc62f83de2bdab4bfb37a8fea4c85aad5 as 0.0.1"
   },
   "require-dev": {
+    "typo3/testing-framework": "^8.0",
     "friendsofphp/php-cs-fixer": "^3.84"
   },
   "extra": {
@@ -43,6 +49,10 @@
     }
   },
   "scripts": {
-    "code-fix": "PHP_CS_FIXER_IGNORE_ENV=1 .Build/bin/php-cs-fixer fix Classes --rules=@PER-CS2.0:risky,@PER-CS2.0,declare_strict_types,no_unused_imports --allow-risky yes"
+    "code-fix": [
+      "PHP_CS_FIXER_IGNORE_ENV=1 .Build/bin/php-cs-fixer fix Classes --rules=@PER-CS2.0:risky,@PER-CS2.0,declare_strict_types,no_unused_imports --allow-risky yes",
+      "PHP_CS_FIXER_IGNORE_ENV=1 .Build/bin/php-cs-fixer fix Tests --rules=@PER-CS2.0:risky,@PER-CS2.0,declare_strict_types,no_unused_imports --allow-risky yes"
+    ],
+    "code-test": "phpunit -c Tests/UnitTests.xml"
   }
 }

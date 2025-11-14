@@ -3,3 +3,4 @@
 /.php-cs-fixer.cache
 /.idea
 .DS_Store
+/Tests/.phpunit.cache

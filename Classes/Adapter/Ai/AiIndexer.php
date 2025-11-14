@@ -19,9 +19,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class AiIndexer implements IndexerInterface
 {
-    public function __construct(protected AiBridge $aiBridge)
-    {
-    }
+    public function __construct(protected AiBridge $aiBridge) {}
 
     public function save(Index $index, array $document, array $options = []): TaskInterface|null
     {
@@ -42,8 +40,9 @@ class AiIndexer implements IndexerInterface
     public function delete(Index $index, string $identifier, array $options = []): TaskInterface|null
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->aiBridge->getTableName());
-        $statement = $connection->prepare('DELETE FROM '.$this->aiBridge->getTableName().' WHERE JSON_EXTRACT(metadata, "$.id") = :identifier');
+        $statement = $connection->prepare('DELETE FROM ' . $this->aiBridge->getTableName() . ' WHERE JSON_EXTRACT(metadata, "$.id") = :identifier');
         $statement->bindValue('identifier', $identifier);
+        $statement->executeStatement();
 
         return new SyncTask(null);
     }

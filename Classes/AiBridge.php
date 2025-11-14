@@ -8,7 +8,6 @@ use Symfony\AI\Platform\Bridge\Gemini\Embeddings;
 use Symfony\AI\Platform\Bridge\Gemini\Embeddings\TaskType;
 use Symfony\AI\Platform\Bridge\Gemini\PlatformFactory;
 use Symfony\AI\Store\Bridge\MariaDb\Store;
-use Symfony\AI\Store\Document\Loader\InMemoryLoader;
 use Symfony\AI\Store\Document\Vectorizer;
 use Symfony\AI\Store\ManagedStoreInterface;
 use Symfony\AI\Store\StoreInterface;
@@ -24,9 +23,7 @@ class AiBridge
 
     protected array $dsn;
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function getStore(): StoreInterface&ManagedStoreInterface
     {
@@ -66,23 +63,23 @@ class AiBridge
 
     public function getTableName(): string
     {
-        $suffix = isset($this->dsn['query']['tableNameSuffix']) ? (string)$this->dsn['query']['tableNameSuffix'] : '';
+        $suffix = isset($this->dsn['query']['tableNameSuffix']) ? (string) $this->dsn['query']['tableNameSuffix'] : '';
         return 'tx_sealai_data' . $suffix;
     }
 
     public function getDimensions(): int
     {
-        return isset($this->dsn['query']['dimensions']) ? (int)$this->dsn['query']['dimensions'] : 768;
+        return isset($this->dsn['query']['dimensions']) ? (int) $this->dsn['query']['dimensions'] : 768;
     }
 
     protected function getApiKey(): string
     {
-        $apiKeyConfiguration = isset($this->dsn['query']['api_key']) ? (string)$this->dsn['query']['api_key'] : '';
+        $apiKeyConfiguration = isset($this->dsn['query']['api_key']) ? (string) $this->dsn['query']['api_key'] : '';
         if (!empty($apiKeyConfiguration)) {
             return $apiKeyConfiguration;
         }
 
-        return (string)getenv('GEMINI_API_KEY');
+        return (string) getenv('GEMINI_API_KEY');
     }
 
 }
