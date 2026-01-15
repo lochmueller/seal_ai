@@ -8,13 +8,13 @@
                 <source>AI Platform DSN</source>
             </trans-unit>
             <trans-unit id="site.sealAiPlatformDsn.description">
-                <source>Configure the AI platform via DSN. Examples are https://github.com/symfony/ai/issues/402</source>
+                <source>Configure the AI platform via DSN. Examples check placeholder.</source>
             </trans-unit>
             <trans-unit id="site.sealAiStoreDsn">
                 <source>AI Store DSN</source>
             </trans-unit>
             <trans-unit id="site.sealAiStoreDsn.description">
-                <source>Configure the AI store via DSN. Examples are (@todo)</source>
+                <source>Configure the AI store via DSN. Examples check placeholder.</source>
             </trans-unit>
         </body>
     </file>

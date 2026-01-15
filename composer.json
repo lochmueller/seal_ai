@@ -26,12 +26,37 @@
     "php": "^8.3",
     "typo3/cms-core": "^13.4",
     "lochmueller/seal": "0.0.2",
-    "symfony/ai-platform": "dev-main#64c7a4e9ba4a2ccedb8e3e4f94225a5125f3b78e as 0.0.1",
-    "symfony/ai-store": "dev-main#bd0c539fc62f83de2bdab4bfb37a8fea4c85aad5 as 0.0.1"
+    "symfony/ai-platform": "^0.2",
+    "symfony/ai-store": "^0.2",
+    "symfony/ai-maria-db-store": "^0.2"
   },
   "require-dev": {
     "typo3/testing-framework": "^8.0",
-    "friendsofphp/php-cs-fixer": "^3.84"
+    "friendsofphp/php-cs-fixer": "^3.84",
+    "symfony/ai-open-ai-platform": "^0.2",
+    "symfony/ai-anthropic-platform": "^0.2",
+    "symfony/ai-gemini-platform": "^0.2",
+    "symfony/ai-open-router-platform": "^0.2",
+    "symfony/ai-vertex-ai-platform": "^0.2",
+    "symfony/ai-mistral-platform": "^0.2",
+    "symfony/ai-ollama-platform": "^0.2",
+    "symfony/ai-hugging-face-platform": "^0.2",
+    "symfony/ai-replicate-platform": "^0.2",
+    "symfony/ai-lm-studio-platform": "^0.2",
+    "symfony/ai-albert-platform": "^0.2",
+    "symfony/ai-cartesia-platform": "^0.2",
+    "symfony/ai-eleven-labs-platform": "^0.2",
+    "symfony/ai-perplexity-platform": "^0.2",
+    "symfony/ai-scaleway-platform": "^0.2",
+    "symfony/ai-voyage-platform": "^0.2",
+    "symfony/ai-deep-seek-platform": "^0.2",
+    "symfony/ai-cerebras-platform": "^0.2",
+    "symfony/ai-decart-platform": "^0.2",
+    "symfony/ai-ai-ml-api-platform": "^0.2",
+    "symfony/ai-docker-model-runner-platform": "^0.2",
+    "symfony/ai-transformers-php-platform": "^0.2",
+    "symfony/ai-generic-platform": "^0.2",
+    "symfony/ai-azure-platform": "^0.2"
   },
   "extra": {
     "typo3/cms": {
@@ -45,13 +70,13 @@
     "bin-dir": ".Build/bin",
     "allow-plugins": {
       "typo3/cms-composer-installers": true,
-      "typo3/class-alias-loader": true
+      "typo3/class-alias-loader": true,
+      "codewithkyrian/platform-package-installer": true
     }
   },
   "scripts": {
     "code-fix": [
-      "PHP_CS_FIXER_IGNORE_ENV=1 .Build/bin/php-cs-fixer fix Classes --rules=@PER-CS2.0:risky,@PER-CS2.0,declare_strict_types,no_unused_imports --allow-risky yes",
-      "PHP_CS_FIXER_IGNORE_ENV=1 .Build/bin/php-cs-fixer fix Tests --rules=@PER-CS2.0:risky,@PER-CS2.0,declare_strict_types,no_unused_imports --allow-risky yes"
+      "php-cs-fixer fix"
     ],
     "code-test": "phpunit -c Tests/UnitTests.xml"
   }

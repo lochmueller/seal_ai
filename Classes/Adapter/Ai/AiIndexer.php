@@ -39,6 +39,7 @@ class AiIndexer implements IndexerInterface
 
     public function delete(Index $index, string $identifier, array $options = []): TaskInterface|null
     {
+        // @todo check
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->aiBridge->getTableName());
         $statement = $connection->prepare('DELETE FROM ' . $this->aiBridge->getTableName() . ' WHERE JSON_EXTRACT(metadata, "$.id") = :identifier');
         $statement->bindValue('identifier', $identifier);

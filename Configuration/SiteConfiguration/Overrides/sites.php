@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 $lll = 'LLL:EXT:seal_ai/Resources/Private/Language/locallang.xlf:';
 
 $GLOBALS['SiteConfiguration']['site']['columns']['sealAiPlatformDsn'] = [
@@ -8,7 +10,8 @@ $GLOBALS['SiteConfiguration']['site']['columns']['sealAiPlatformDsn'] = [
     'config' => [
         'type' => 'input',
         'eval' => 'trim',
-        'default' => '', // @todo
+        'default' => '',
+        'placeholder' =>  'openrouter://APIKEY_HERE@openrouter.ai?model=gemini-embedding-001&dimensions=768',
     ],
 ];
 
@@ -18,7 +21,8 @@ $GLOBALS['SiteConfiguration']['site']['columns']['sealAiStoreDsn'] = [
     'config' => [
         'type' => 'input',
         'eval' => 'trim',
-        'default' => '', // @todo
+        'default' => '',
+        'placeholder' =>  'mariadb://localhost?dimensions=768',
     ],
 ];
 

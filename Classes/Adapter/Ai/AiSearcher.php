@@ -39,14 +39,12 @@ class AiSearcher implements SearcherInterface
             ),
         ];
 
-        $vectorDocuments = $this->aiBridge->getVectorizer()->vectorizeTextDocuments($documents);
+        $vectorDocuments = $this->aiBridge->getVectorizer()->vectorize($documents);
 
         $vectorDocument = $vectorDocuments[0];
         $result = $this->aiBridge->getStore()->query($vectorDocument->vector, [
             'limit' => $search->limit ?? 10,
         ]);
-
-        // @todo add relevant configuration cut
 
         return new Result((function () use ($result) {
             foreach ($result as $item) {

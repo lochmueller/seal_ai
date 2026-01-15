@@ -12,11 +12,13 @@ use Lochmueller\SealAi\AiBridge;
 
 class AiSchemaManager implements SchemaManagerInterface
 {
-    public function __construct(protected AiBridge $aiBridge) {}
+    public function __construct(protected AiBridge $aiBridge)
+    {
+    }
 
     public function existIndex(Index $index): bool
     {
-        // Exists, because Init process also create the data structure
+        // Always exists
         return true;
     }
 
@@ -29,8 +31,7 @@ class AiSchemaManager implements SchemaManagerInterface
 
     public function createIndex(Index $index, array $options = []): TaskInterface|null
     {
-        $this->aiBridge->initializeStore();
-
+        // Always exists
         return new SyncTask(null);
     }
 }
