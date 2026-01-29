@@ -25,7 +25,7 @@
   "require": {
     "php": "^8.3",
     "typo3/cms-core": "^13.4||^14.1",
-    "lochmueller/seal": "0.1.0",
+    "lochmueller/seal": "^0.2",
     "symfony/ai-platform": "^0.3",
     "symfony/ai-store": "^0.3",
     "symfony/ai-maria-db-store": "^0.3"

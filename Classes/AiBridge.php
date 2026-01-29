@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lochmueller\SealAi;
 
+use Lochmueller\Seal\DsnParser;
 use Lochmueller\SealAi\Factory\PlatformFactory;
 use Lochmueller\SealAi\Factory\StoreFactory;
 use Symfony\AI\Platform\PlatformInterface;

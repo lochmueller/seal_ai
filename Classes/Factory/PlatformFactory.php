@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Lochmueller\SealAi\Factory;
 
-use Lochmueller\SealAi\Dto\DsnDto;
+use Lochmueller\Seal\Dto\DsnDto;
 use Symfony\AI\Platform\Bridge\HuggingFace\Provider;
 use Symfony\AI\Platform\PlatformInterface;
 use Symfony\AI\Platform\Bridge\OpenRouter\PlatformFactory as OpenRouterPlatformFactory;

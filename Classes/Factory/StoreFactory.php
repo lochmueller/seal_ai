@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Lochmueller\SealAi\Factory;
 
-use Lochmueller\SealAi\Dto\DsnDto;
+use Lochmueller\Seal\Dto\DsnDto;
 use Symfony\AI\Store\Bridge\MariaDb\Store;
 use Symfony\AI\Store\ManagedStoreInterface;
 use Symfony\AI\Store\StoreInterface;
