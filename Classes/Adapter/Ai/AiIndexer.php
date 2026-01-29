@@ -21,7 +21,7 @@ class AiIndexer implements IndexerInterface
 {
     public function __construct(protected AiBridge $aiBridge) {}
 
-    public function save(Index $index, array $document, array $options = []): TaskInterface|null
+    public function save(Index $index, array $document, array $options = []): ?TaskInterface
     {
         $this->delete($index, $document['id']);
 
@@ -37,7 +37,7 @@ class AiIndexer implements IndexerInterface
         return new SyncTask(null);
     }
 
-    public function delete(Index $index, string $identifier, array $options = []): TaskInterface|null
+    public function delete(Index $index, string $identifier, array $options = []): ?TaskInterface
     {
         // @todo check
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->aiBridge->getTableName());
@@ -48,7 +48,7 @@ class AiIndexer implements IndexerInterface
         return new SyncTask(null);
     }
 
-    public function bulk(Index $index, iterable $saveDocuments, iterable $deleteDocumentIdentifiers, int $bulkSize = 100, array $options = []): TaskInterface|null
+    public function bulk(Index $index, iterable $saveDocuments, iterable $deleteDocumentIdentifiers, int $bulkSize = 100, array $options = []): ?TaskInterface
     {
         foreach ($deleteDocumentIdentifiers as $deleteDocumentIdentifier) {
             $this->delete($index, $deleteDocumentIdentifier);

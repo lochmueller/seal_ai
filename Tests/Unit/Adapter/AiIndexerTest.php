@@ -11,7 +11,7 @@ use Lochmueller\SealAi\Tests\Unit\AbstractTest;
 
 class AiIndexerTest extends AbstractTest
 {
-    public function testSaveNewDocumentsToIndex()
+    public function testSaveNewDocumentsToIndex(): void
     {
         $aiBridge = $this->getMockBuilder(AiBridge::class)->disableOriginalConstructor()->getMock();
 

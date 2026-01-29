@@ -56,7 +56,8 @@
     "symfony/ai-docker-model-runner-platform": "^0.2",
     "symfony/ai-transformers-php-platform": "^0.2",
     "symfony/ai-generic-platform": "^0.2",
-    "symfony/ai-azure-platform": "^0.2"
+    "symfony/ai-azure-platform": "^0.2",
+    "phpstan/phpstan": "^2.1"
   },
   "extra": {
     "typo3/cms": {
@@ -76,8 +77,17 @@
   },
   "scripts": {
     "code-fix": [
-      "php-cs-fixer fix"
+      "@php-cs-fixer"
     ],
-    "code-test": "phpunit -c Tests/UnitTests.xml"
+    "code-check": [
+      "@phpstan"
+    ],
+    "code-test": [
+      "@phpunit"
+    ],
+    "phpunit": "phpunit -c Tests/UnitTests.xml",
+    "code-test-coverage": "XDEBUG_MODE=coverage phpunit -c Tests/UnitTests.xml --coverage-html .Build/coverage/",
+    "phpstan": "phpstan analyse Classes --memory-limit 1G --level 8",
+    "php-cs-fixer": "php-cs-fixer fix --allow-unsupported-php-version yes"
   }
 }

@@ -12,9 +12,7 @@ use Lochmueller\SealAi\AiBridge;
 
 class AiSchemaManager implements SchemaManagerInterface
 {
-    public function __construct(protected AiBridge $aiBridge)
-    {
-    }
+    public function __construct(protected AiBridge $aiBridge) {}
 
     public function existIndex(Index $index): bool
     {
@@ -22,14 +20,14 @@ class AiSchemaManager implements SchemaManagerInterface
         return true;
     }
 
-    public function dropIndex(Index $index, array $options = []): TaskInterface|null
+    public function dropIndex(Index $index, array $options = []): ?TaskInterface
     {
         $this->aiBridge->getStore()->drop();
 
         return new SyncTask(null);
     }
 
-    public function createIndex(Index $index, array $options = []): TaskInterface|null
+    public function createIndex(Index $index, array $options = []): ?TaskInterface
     {
         // Always exists
         return new SyncTask(null);
