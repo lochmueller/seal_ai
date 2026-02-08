@@ -27,12 +27,12 @@
     "typo3/cms-core": "^13.4||^14.1",
     "lochmueller/seal": "^0.2",
     "symfony/ai-platform": "^0.3",
-    "symfony/ai-store": "^0.3",
-    "symfony/ai-maria-db-store": "^0.3"
+    "symfony/ai-store": "^0.3"
   },
   "require-dev": {
-    "typo3/testing-framework": "^8.0",
+    "typo3/testing-framework": "^8.0||^9.3",
     "friendsofphp/php-cs-fixer": "^3.84",
+    "symfony/ai-maria-db-store": "^0.3",
     "symfony/ai-open-ai-platform": "^0.3",
     "symfony/ai-anthropic-platform": "^0.3",
     "symfony/ai-gemini-platform": "^0.3",
