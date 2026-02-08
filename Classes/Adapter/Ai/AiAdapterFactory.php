@@ -31,9 +31,7 @@ class AiAdapterFactory implements AdapterFactoryInterface
         /** @var SiteInterface $site */
         $site = $this->request->getAttribute('site');
 
-        if (!$site instanceof Site) {
-            throw new \RuntimeException('No site found in current request for AI adapter build', 1236891231);
-        }
+        $site instanceof Site or throw new \RuntimeException('No site found in current request for AI adapter build', 1236891231);
 
         $this->aiBridge->initialize($site);
         return $this->adapter;

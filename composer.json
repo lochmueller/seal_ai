@@ -57,6 +57,10 @@
     "symfony/ai-transformers-php-platform": "^0.3",
     "symfony/ai-generic-platform": "^0.3",
     "symfony/ai-azure-platform": "^0.3",
+    "symfony/ai-meta-platform": "^0.3",
+    "symfony/ai-bedrock-platform": "^0.3",
+    "symfony/ai-failover-platform": "^0.3",
+    "symfony/ai-cache-platform": "^0.3",
     "phpstan/phpstan": "^2.1"
   },
   "extra": {
