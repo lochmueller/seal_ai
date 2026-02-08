@@ -14,8 +14,6 @@ use Symfony\AI\Store\Document\Metadata;
 use Symfony\AI\Store\Document\TextDocument;
 use Symfony\AI\Store\Indexer;
 use Symfony\Component\Uid\Uuid;
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class AiIndexer implements IndexerInterface
 {
@@ -39,11 +37,8 @@ class AiIndexer implements IndexerInterface
 
     public function delete(Index $index, string $identifier, array $options = []): ?TaskInterface
     {
-        // @todo check
-        $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->aiBridge->getTableName());
-        $statement = $connection->prepare('DELETE FROM ' . $this->aiBridge->getTableName() . ' WHERE JSON_EXTRACT(metadata, "$.id") = :identifier');
-        $statement->bindValue('identifier', $identifier);
-        $statement->executeStatement();
+        // @todo Migrate to new remove function from store
+        // $this->aiBridge->getStore()->remove([$identifier]);
 
         return new SyncTask(null);
     }

@@ -14,7 +14,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class StoreFactory
 {
     // @todo build up store based on DSN
-    // @todo used memory store for tests
     public function fromDsn(DsnDto $dsn): StoreInterface&ManagedStoreInterface
     {
 
