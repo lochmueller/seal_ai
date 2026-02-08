@@ -8,7 +8,6 @@ use Lochmueller\Seal\DsnParser;
 use Lochmueller\SealAi\Factory\PlatformFactory;
 use Lochmueller\SealAi\Factory\StoreFactory;
 use Symfony\AI\Platform\PlatformInterface;
-use Symfony\AI\Store\Bridge\MariaDb\Store;
 use Symfony\AI\Store\Document\Vectorizer;
 use Symfony\AI\Store\Document\VectorizerInterface;
 use Symfony\AI\Store\ManagedStoreInterface;

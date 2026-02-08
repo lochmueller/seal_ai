@@ -68,6 +68,7 @@ class AiSearcher implements SearcherInterface
 
     public function count(Index $index): int
     {
+        // @todo change to store
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable($this->aiBridge->getTableName());
 
