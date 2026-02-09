@@ -34,9 +34,15 @@ use Symfony\AI\Platform\Bridge\Azure\OpenAi\PlatformFactory as AzureOpenAiPlatfo
 use Symfony\AI\Platform\Bridge\Azure\Meta\PlatformFactory as AzureMetaPlatformFactory;
 use Symfony\AI\Platform\Bridge\Bedrock\PlatformFactory as BedrockPlatformFactory;
 use Symfony\Component\HttpClient\HttpClient;
+use Lochmueller\SealAi\Event\PlatformFactoryEvent;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
 class PlatformFactory
 {
+    public function __construct(
+        private readonly EventDispatcherInterface $eventDispatcher,
+    ) {}
+
     public function fromDsn(DsnDto $dsn): PlatformInterface
     {
         $apiKey = $dsn->user;
@@ -71,6 +77,10 @@ class PlatformFactory
         // azure-meta://api-key@host
 
         switch ($dsn->scheme) {
+            case 'event':
+                $event = $this->eventDispatcher->dispatch(new PlatformFactoryEvent($dsn));
+                return $event->getPlatform() ?? throw new \RuntimeException('No platform provided by event listener for DSN scheme "event"', 1739091200);
+
             case 'openai':
                 class_exists(OpenAiPlatformFactory::class) or throw new \RuntimeException('Please install symfony/ai-open-ai-platform to use OpenAI platform');
                 return OpenAiPlatformFactory::create($apiKey, $client);

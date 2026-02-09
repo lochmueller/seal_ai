@@ -27,9 +27,15 @@ use Symfony\AI\Store\StoreInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Lochmueller\SealAi\Event\StoreFactoryEvent;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
 class StoreFactory
 {
+    public function __construct(
+        private readonly EventDispatcherInterface $eventDispatcher,
+    ) {}
+
     public function fromDsn(DsnDto $dsn): StoreInterface&ManagedStoreInterface
     {
         $client = HttpClient::create();
@@ -54,6 +60,10 @@ class StoreFactory
         // clickhouse://host:8123?databaseName=my_db&tableName=my_table
 
         switch ($dsn->scheme) {
+            case 'event':
+                $event = $this->eventDispatcher->dispatch(new StoreFactoryEvent($dsn));
+                return $event->getStore() ?? throw new \RuntimeException('No store provided by event listener for DSN scheme "event"', 1739091201);
+
             case 'mariadb':
                 class_exists(MariaDbStore::class) or throw new \RuntimeException('Please install symfony/ai-maria-db-store to use MariaDB store');
                 $typo3Connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('tt_content');
