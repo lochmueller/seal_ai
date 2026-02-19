@@ -9,10 +9,10 @@ use CmsIg\Seal\Schema\Index;
 use CmsIg\Seal\Task\SyncTask;
 use CmsIg\Seal\Task\TaskInterface;
 use Lochmueller\SealAi\AiBridge;
-use Symfony\AI\Store\Document\Loader\InMemoryLoader;
 use Symfony\AI\Store\Document\Metadata;
 use Symfony\AI\Store\Document\TextDocument;
-use Symfony\AI\Store\Indexer;
+use Symfony\AI\Store\Indexer\DocumentIndexer;
+use Symfony\AI\Store\Indexer\DocumentProcessor;
 use Symfony\Component\Uid\Uuid;
 
 class AiIndexer implements IndexerInterface
@@ -23,22 +23,24 @@ class AiIndexer implements IndexerInterface
     {
         $this->delete($index, $document['id']);
 
-        $memory = new InMemoryLoader([new TextDocument(
-            id: Uuid::v4(),
+        $processor = new DocumentProcessor(
+            $this->aiBridge->getVectorizer(),
+            $this->aiBridge->getStore()
+        );
+
+        $aiIndexer = new DocumentIndexer($processor);
+        $aiIndexer->index([new TextDocument(
+            id: Uuid::v4()->toString(),
             content: $document['title'] . ' ' . $document['content'],
             metadata: new Metadata($document),
         )]);
-
-        $aiIndexer = new Indexer($memory, $this->aiBridge->getVectorizer(), $this->aiBridge->getStore(), 'memory');
-        $aiIndexer->index();
 
         return new SyncTask(null);
     }
 
     public function delete(Index $index, string $identifier, array $options = []): ?TaskInterface
     {
-        // @todo Migrate to new remove function from store
-        // $this->aiBridge->getStore()->remove([$identifier]);
+        $this->aiBridge->getStore()->remove([$identifier]);
 
         return new SyncTask(null);
     }

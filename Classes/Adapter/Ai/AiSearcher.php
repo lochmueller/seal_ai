@@ -12,9 +12,8 @@ use CmsIg\Seal\Search\Condition;
 use Lochmueller\SealAi\AiBridge;
 use Symfony\AI\Store\Document\TextDocument;
 use Symfony\AI\Store\Document\VectorDocument;
+use Symfony\AI\Store\Query\VectorQuery;
 use Symfony\Component\Uid\Uuid;
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class AiSearcher implements SearcherInterface
 {
@@ -34,7 +33,7 @@ class AiSearcher implements SearcherInterface
 
         $documents = [
             new TextDocument(
-                id: Uuid::v4(),
+                id: Uuid::v4()->toString(),
                 content: $this->searchTerm,
             ),
         ];
@@ -42,14 +41,14 @@ class AiSearcher implements SearcherInterface
         $vectorDocuments = $this->aiBridge->getVectorizer()->vectorize($documents);
 
         $vectorDocument = $vectorDocuments[0];
-        $result = $this->aiBridge->getStore()->query($vectorDocument->vector, [
+        $result = $this->aiBridge->getStore()->query(new VectorQuery($vectorDocument->getVector()), [
             'limit' => $search->limit ?? 10,
         ]);
 
         return new Result((function () use ($result) {
             foreach ($result as $item) {
                 /** @var $item VectorDocument */
-                yield array_merge($item->metadata->getArrayCopy(), ['score' => $item->score]);
+                yield array_merge($item->getMetadata()->getArrayCopy(), ['score' => $item->getScore()]);
             }
         })(), count($result), []);
     }
@@ -58,7 +57,7 @@ class AiSearcher implements SearcherInterface
     {
         foreach ($conditions as $filter) {
             if ($filter instanceof Condition\SearchCondition) {
-                $this->searchTerm = $filter->query;
+                $this->searchTerm = trim($filter->query);
             } elseif ($filter instanceof Condition\AndCondition | $filter instanceof Condition\OrCondition) {
                 $this->recursiveFindSearchTerm($filter->conditions);
             };
@@ -68,14 +67,7 @@ class AiSearcher implements SearcherInterface
 
     public function count(Index $index): int
     {
-        // @todo change to store
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getQueryBuilderForTable($this->aiBridge->getTableName());
-
-        return (int) $queryBuilder
-            ->count('*')
-            ->from($this->aiBridge->getTableName())
-            ->executeQuery()
-            ->fetchOne();
+        // There is no general count of store documents in symfony/ai
+        return 0;
     }
 }
