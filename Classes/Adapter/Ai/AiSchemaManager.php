@@ -16,8 +16,7 @@ class AiSchemaManager implements SchemaManagerInterface
 
     public function existIndex(Index $index): bool
     {
-        // Always exists
-        return true;
+        return $this->aiBridge->getStore()->exists();
     }
 
     public function dropIndex(Index $index, array $options = []): ?TaskInterface
@@ -29,7 +28,8 @@ class AiSchemaManager implements SchemaManagerInterface
 
     public function createIndex(Index $index, array $options = []): ?TaskInterface
     {
-        // Always exists
+        $this->aiBridge->getStore()->create();
+
         return new SyncTask(null);
     }
 }

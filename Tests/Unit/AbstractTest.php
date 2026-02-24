@@ -25,10 +25,7 @@ abstract class AbstractTest extends UnitTestCase
         return new Vectorizer(new class implements PlatformInterface {
             public function invoke(string $model, object|array|string $input, array $options = []): DeferredResult
             {
-
-                // Dummy new Vector([0.1, 0.2, 0.3]);
-
-                // TODO: Implement invoke() method.
+                return new DeferredResult(fn () => new Vector([0.1, 0.2, 0.3]));
             }
 
             public function getModelCatalog(): ModelCatalogInterface

@@ -47,13 +47,21 @@ class AiBridge
     {
         $config = $site->getConfiguration();
         // Store
-        $dsnDto = $this->dsnParser->parse($config['sealAiPlatformDsn'] ?? '');
+        $dsnDto = $this->dsnParser->parse($config['sealAiStoreDsn'] ?? '');
         $this->store = $this->storeFactory->fromDsn($dsnDto);
 
         // Platform
-        $dsnDto = $this->dsnParser->parse($config['sealAiStoreDsn'] ?? '');
+        $dsnDto = $this->dsnParser->parse($config['sealAiPlatformDsn'] ?? '');
         $this->platform = $this->platformFactory->fromDsn($dsnDto);
-        $this->vectorizer = new Vectorizer($this->platform, $dsnDto->query['model'] ?? '');
+
+        $model = $dsnDto->query['model'] ?? '';
+        if ($model === '') {
+            throw new \RuntimeException(
+                'Missing "model" query parameter in sealAiPlatformDsn. Example: openai://key@default?model=text-embedding-3-small',
+                1739091202
+            );
+        }
+        $this->vectorizer = new Vectorizer($this->platform, $model);
     }
 
 }

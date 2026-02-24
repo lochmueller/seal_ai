@@ -13,8 +13,6 @@ use Symfony\AI\Store\Document\Metadata;
 use Symfony\AI\Store\Document\TextDocument;
 use Symfony\AI\Store\Indexer\DocumentIndexer;
 use Symfony\AI\Store\Indexer\DocumentProcessor;
-use Symfony\Component\Uid\Uuid;
-
 class AiIndexer implements IndexerInterface
 {
     public function __construct(protected AiBridge $aiBridge) {}
@@ -30,7 +28,7 @@ class AiIndexer implements IndexerInterface
 
         $aiIndexer = new DocumentIndexer($processor);
         $aiIndexer->index([new TextDocument(
-            id: Uuid::v4()->toString(),
+            id: $document['id'],
             content: $document['title'] . ' ' . $document['content'],
             metadata: new Metadata($document),
         )]);

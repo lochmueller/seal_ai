@@ -13,7 +13,12 @@ class AiIndexerTest extends AbstractTest
 {
     public function testSaveNewDocumentsToIndex(): void
     {
+        $store = $this->getStore();
+        $vectorizer = $this->getVectorizer();
+
         $aiBridge = $this->getMockBuilder(AiBridge::class)->disableOriginalConstructor()->getMock();
+        $aiBridge->method('getStore')->willReturn($store);
+        $aiBridge->method('getVectorizer')->willReturn($vectorizer);
 
         $indexer = new AiIndexer($aiBridge);
 
@@ -21,7 +26,7 @@ class AiIndexerTest extends AbstractTest
 
         $indexer->save($index, [
             'id' => 'dummy',
-            'title' => 'Ich in der Titel',
+            'title' => 'Ich bin der Titel',
             'content' => 'I am the content',
         ]);
     }

@@ -13,19 +13,16 @@ use Lochmueller\SealAi\AiBridge;
 use Symfony\AI\Store\Document\TextDocument;
 use Symfony\AI\Store\Document\VectorDocument;
 use Symfony\AI\Store\Query\VectorQuery;
-use Symfony\Component\Uid\Uuid;
 
 class AiSearcher implements SearcherInterface
 {
-    protected string $searchTerm = '';
-
     public function __construct(protected AiBridge $aiBridge) {}
 
     public function search(Search $search): Result
     {
-        $this->recursiveFindSearchTerm($search->filters);
+        $searchTerm = $this->recursiveFindSearchTerm($search->filters);
 
-        if ($this->searchTerm === '') {
+        if ($searchTerm === '') {
             return new Result((function () {
                 yield from [];
             })(), 0, []);
@@ -33,36 +30,44 @@ class AiSearcher implements SearcherInterface
 
         $documents = [
             new TextDocument(
-                id: Uuid::v4()->toString(),
-                content: $this->searchTerm,
+                id: 'search-query',
+                content: $searchTerm,
             ),
         ];
 
         $vectorDocuments = $this->aiBridge->getVectorizer()->vectorize($documents);
 
         $vectorDocument = $vectorDocuments[0];
-        $result = $this->aiBridge->getStore()->query(new VectorQuery($vectorDocument->getVector()), [
+        $resultItems = $this->aiBridge->getStore()->query(new VectorQuery($vectorDocument->getVector()), [
             'limit' => $search->limit ?? 10,
         ]);
 
-        return new Result((function () use ($result) {
-            foreach ($result as $item) {
-                /** @var $item VectorDocument */
-                yield array_merge($item->getMetadata()->getArrayCopy(), ['score' => $item->getScore()]);
-            }
-        })(), count($result), []);
+        $items = [];
+        foreach ($resultItems as $item) {
+            /** @var VectorDocument $item */
+            $items[] = array_merge($item->getMetadata()->getArrayCopy(), ['score' => $item->getScore()]);
+        }
+
+        return new Result((function () use ($items) {
+            yield from $items;
+        })(), count($items), []);
     }
 
-    private function recursiveFindSearchTerm(array $conditions): void
+    private function recursiveFindSearchTerm(array $conditions): string
     {
         foreach ($conditions as $filter) {
             if ($filter instanceof Condition\SearchCondition) {
-                $this->searchTerm = trim($filter->query);
-            } elseif ($filter instanceof Condition\AndCondition | $filter instanceof Condition\OrCondition) {
-                $this->recursiveFindSearchTerm($filter->conditions);
-            };
+                return trim($filter->query);
+            }
+            if ($filter instanceof Condition\AndCondition || $filter instanceof Condition\OrCondition) {
+                $result = $this->recursiveFindSearchTerm($filter->conditions);
+                if ($result !== '') {
+                    return $result;
+                }
+            }
         }
 
+        return '';
     }
 
     public function count(Index $index): int
