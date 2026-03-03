@@ -16,9 +16,8 @@ use TYPO3\CMS\Core\Site\Entity\SiteInterface;
 class AiAdapterFactory implements AdapterFactoryInterface
 {
     public function __construct(
-        private AiBridge               $aiBridge,
-        private AiAdapter              $adapter,
-        private ServerRequestInterface $request,
+        private AiBridge  $aiBridge,
+        private AiAdapter $adapter,
     ) {}
 
     public static function getName(): string
@@ -28,8 +27,11 @@ class AiAdapterFactory implements AdapterFactoryInterface
 
     public function createAdapter(array $dsn): AdapterInterface
     {
+        /** @var ServerRequestInterface $request */
+        $request = $GLOBALS['TYPO3_REQUEST'];
+
         /** @var SiteInterface $site */
-        $site = $this->request->getAttribute('site');
+        $site = $request->getAttribute('site');
 
         $site instanceof Site or throw new \RuntimeException('No site found in current request for AI adapter build', 1236891231);
 
