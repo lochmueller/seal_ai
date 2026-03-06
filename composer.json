@@ -1,8 +1,8 @@
 {
   "name": "lochmueller/seal-ai",
-  "type": "typo3-cms-extension",
   "description": "SEAL Search AI - Vector based search based on EXT:seal",
   "license": "GPL-2.0-or-later",
+  "type": "typo3-cms-extension",
   "keywords": [
     "typo3",
     "cmsig",
@@ -12,6 +12,77 @@
     "search-client",
     "search"
   ],
+  "require": {
+    "php": "^8.3",
+    "lochmueller/seal": "^0.3",
+    "symfony/ai-platform": "^0.6",
+    "symfony/ai-store": "^0.6",
+    "typo3/cms-core": "^13.4 || ^14.1"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.84",
+    "phpstan/phpstan": "^2.1",
+    "symfony/ai-ai-ml-api-platform": "^0.6",
+    "symfony/ai-albert-platform": "^0.6",
+    "symfony/ai-anthropic-platform": "^0.6",
+    "symfony/ai-azure-platform": "^0.6",
+    "symfony/ai-azure-search-store": "^0.6",
+    "symfony/ai-bedrock-platform": "^0.6",
+    "symfony/ai-cache-message-store": "^0.6",
+    "symfony/ai-cache-platform": "^0.6",
+    "symfony/ai-cache-store": "^0.6",
+    "symfony/ai-cartesia-platform": "^0.6",
+    "symfony/ai-cerebras-platform": "^0.6",
+    "symfony/ai-chroma-db-store": "^0.6",
+    "symfony/ai-click-house-store": "^0.6",
+    "symfony/ai-cloudflare-message-store": "^0.6",
+    "symfony/ai-cloudflare-store": "^0.6",
+    "symfony/ai-decart-platform": "^0.6",
+    "symfony/ai-deep-seek-platform": "^0.6",
+    "symfony/ai-docker-model-runner-platform": "^0.6",
+    "symfony/ai-doctrine-message-store": "^0.6",
+    "symfony/ai-elasticsearch-store": "^0.6",
+    "symfony/ai-eleven-labs-platform": "^0.6",
+    "symfony/ai-failover-platform": "^0.6",
+    "symfony/ai-gemini-platform": "^0.6",
+    "symfony/ai-generic-platform": "^0.6",
+    "symfony/ai-hugging-face-platform": "^0.6",
+    "symfony/ai-lm-studio-platform": "^0.6",
+    "symfony/ai-manticore-search-store": "^0.6",
+    "symfony/ai-maria-db-store": "^0.6",
+    "symfony/ai-meilisearch-message-store": "^0.6",
+    "symfony/ai-meilisearch-store": "^0.6",
+    "symfony/ai-meta-platform": "^0.6",
+    "symfony/ai-milvus-store": "^0.6",
+    "symfony/ai-mistral-platform": "^0.6",
+    "symfony/ai-mongo-db-message-store": "^0.6",
+    "symfony/ai-mongo-db-store": "^0.6",
+    "symfony/ai-neo4j-store": "^0.6",
+    "symfony/ai-ollama-platform": "^0.6",
+    "symfony/ai-open-ai-platform": "^0.6",
+    "symfony/ai-open-router-platform": "^0.6",
+    "symfony/ai-open-search-store": "^0.6",
+    "symfony/ai-perplexity-platform": "^0.6",
+    "symfony/ai-pinecone-store": "^0.6",
+    "symfony/ai-pogocache-message-store": "^0.6",
+    "symfony/ai-postgres-store": "^0.6",
+    "symfony/ai-qdrant-store": "^0.6",
+    "symfony/ai-redis-message-store": "^0.6",
+    "symfony/ai-redis-store": "^0.6",
+    "symfony/ai-replicate-platform": "^0.6",
+    "symfony/ai-scaleway-platform": "^0.6",
+    "symfony/ai-session-message-store": "^0.6",
+    "symfony/ai-supabase-store": "^0.6",
+    "symfony/ai-surreal-db-message-store": "^0.6",
+    "symfony/ai-surreal-db-store": "^0.6",
+    "symfony/ai-transformers-php-platform": "^0.6",
+    "symfony/ai-typesense-store": "^0.6",
+    "symfony/ai-vektor-store": "^0.6",
+    "symfony/ai-vertex-ai-platform": "^0.6",
+    "symfony/ai-voyage-platform": "^0.6",
+    "symfony/ai-weaviate-store": "^0.6",
+    "typo3/testing-framework": "^8.0 || ^9.3"
+  },
   "autoload": {
     "psr-4": {
       "Lochmueller\\SealAi\\": "Classes/"
@@ -22,107 +93,36 @@
       "Lochmueller\\SealAi\\Tests\\": "Tests/"
     }
   },
-  "require": {
-    "php": "^8.3",
-    "typo3/cms-core": "^13.4||^14.1",
-    "lochmueller/seal": "^0.3",
-    "symfony/ai-platform": "^0.6",
-    "symfony/ai-store": "^0.6"
-  },
-  "require-dev": {
-    "typo3/testing-framework": "^8.0||^9.3",
-    "friendsofphp/php-cs-fixer": "^3.84",
-    "symfony/ai-maria-db-store": "^0.6",
-    "symfony/ai-qdrant-store": "^0.6",
-    "symfony/ai-postgres-store": "^0.6",
-    "symfony/ai-session-message-store": "^0.6",
-    "symfony/ai-mongo-db-store": "^0.6",
-    "symfony/ai-chroma-db-store": "^0.6",
-    "symfony/ai-cache-message-store": "^0.6",
-    "symfony/ai-pinecone-store": "^0.6",
-    "symfony/ai-meilisearch-store": "^0.6",
-    "symfony/ai-elasticsearch-store": "^0.6",
-    "symfony/ai-cache-store": "^0.6",
-    "symfony/ai-redis-message-store": "^0.6",
-    "symfony/ai-open-search-store": "^0.6",
-    "symfony/ai-doctrine-message-store": "^0.6",
-    "symfony/ai-azure-search-store": "^0.6",
-    "symfony/ai-weaviate-store": "^0.6",
-    "symfony/ai-typesense-store": "^0.6",
-    "symfony/ai-supabase-store": "^0.6",
-    "symfony/ai-redis-store": "^0.6",
-    "symfony/ai-neo4j-store": "^0.6",
-    "symfony/ai-milvus-store": "^0.6",
-    "symfony/ai-cloudflare-store": "^0.6",
-    "symfony/ai-surreal-db-store": "^0.6",
-    "symfony/ai-pogocache-message-store": "^0.6",
-    "symfony/ai-meilisearch-message-store": "^0.6",
-    "symfony/ai-manticore-search-store": "^0.6",
-    "symfony/ai-cloudflare-message-store": "^0.6",
-    "symfony/ai-click-house-store": "^0.6",
-    "symfony/ai-surreal-db-message-store": "^0.6",
-    "symfony/ai-mongo-db-message-store": "^0.6",
-    "symfony/ai-vektor-store": "^0.6",
-    "symfony/ai-open-ai-platform": "^0.6",
-    "symfony/ai-anthropic-platform": "^0.6",
-    "symfony/ai-gemini-platform": "^0.6",
-    "symfony/ai-open-router-platform": "^0.6",
-    "symfony/ai-vertex-ai-platform": "^0.6",
-    "symfony/ai-mistral-platform": "^0.6",
-    "symfony/ai-ollama-platform": "^0.6",
-    "symfony/ai-hugging-face-platform": "^0.6",
-    "symfony/ai-replicate-platform": "^0.6",
-    "symfony/ai-lm-studio-platform": "^0.6",
-    "symfony/ai-albert-platform": "^0.6",
-    "symfony/ai-cartesia-platform": "^0.6",
-    "symfony/ai-eleven-labs-platform": "^0.6",
-    "symfony/ai-perplexity-platform": "^0.6",
-    "symfony/ai-scaleway-platform": "^0.6",
-    "symfony/ai-voyage-platform": "^0.6",
-    "symfony/ai-deep-seek-platform": "^0.6",
-    "symfony/ai-cerebras-platform": "^0.6",
-    "symfony/ai-decart-platform": "^0.6",
-    "symfony/ai-ai-ml-api-platform": "^0.6",
-    "symfony/ai-docker-model-runner-platform": "^0.6",
-    "symfony/ai-transformers-php-platform": "^0.6",
-    "symfony/ai-generic-platform": "^0.6",
-    "symfony/ai-azure-platform": "^0.6",
-    "symfony/ai-meta-platform": "^0.6",
-    "symfony/ai-bedrock-platform": "^0.6",
-    "symfony/ai-failover-platform": "^0.6",
-    "symfony/ai-cache-platform": "^0.6",
-    "phpstan/phpstan": "^2.1"
+  "config": {
+    "allow-plugins": {
+      "codewithkyrian/platform-package-installer": true,
+      "php-http/discovery": true,
+      "typo3/class-alias-loader": true,
+      "typo3/cms-composer-installers": true
+    },
+    "bin-dir": ".Build/bin",
+    "vendor-dir": ".Build/vendor"
   },
   "extra": {
     "typo3/cms": {
-      "extension-key": "seal_ai",
       "cms-package-dir": "{$vendor-dir}/typo3/cms",
+      "extension-key": "seal_ai",
       "web-dir": ".Build/Web"
     }
   },
-  "config": {
-    "vendor-dir": ".Build/vendor",
-    "bin-dir": ".Build/bin",
-    "allow-plugins": {
-      "typo3/cms-composer-installers": true,
-      "typo3/class-alias-loader": true,
-      "codewithkyrian/platform-package-installer": true,
-      "php-http/discovery": true
-    }
-  },
   "scripts": {
-    "code-fix": [
-      "@php-cs-fixer"
-    ],
     "code-check": [
       "@phpstan"
+    ],
+    "code-fix": [
+      "@php-cs-fixer"
     ],
     "code-test": [
       "@phpunit"
     ],
-    "phpunit": "phpunit -c Tests/UnitTests.xml",
     "code-test-coverage": "XDEBUG_MODE=coverage phpunit -c Tests/UnitTests.xml --coverage-html .Build/coverage/",
+    "php-cs-fixer": "php-cs-fixer fix --allow-unsupported-php-version yes",
     "phpstan": "phpstan analyse Classes --memory-limit 1G --level 8",
-    "php-cs-fixer": "php-cs-fixer fix --allow-unsupported-php-version yes"
+    "phpunit": "phpunit -c Tests/UnitTests.xml"
   }
 }
