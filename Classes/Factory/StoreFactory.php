@@ -21,10 +21,12 @@ use Symfony\AI\Store\Bridge\Qdrant\Store as QdrantStore;
 use Symfony\AI\Store\Bridge\Redis\Store as RedisStore;
 use Symfony\AI\Store\Bridge\SurrealDb\Store as SurrealDbStore;
 use Symfony\AI\Store\Bridge\Typesense\Store as TypesenseStore;
+use Symfony\AI\Store\Bridge\Vektor\Store as VektorStore;
 use Symfony\AI\Store\Bridge\Weaviate\Store as WeaviateStore;
 use Symfony\AI\Store\ManagedStoreInterface;
 use Symfony\AI\Store\StoreInterface;
 use Symfony\Component\HttpClient\HttpClient;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Lochmueller\SealAi\Event\StoreFactoryEvent;
@@ -58,6 +60,7 @@ class StoreFactory
         // surrealdb://user:password@host:8000?namespace=my_ns&database=my_db
         // manticore://host:9308?table=my_table
         // clickhouse://host:8123?databaseName=my_db&tableName=my_table
+        // vektor://default/path/to/storage?dimensions=1536
 
         switch ($dsn->scheme) {
             case 'event':
@@ -194,6 +197,12 @@ class StoreFactory
                 $databaseName = $dsn->query['databaseName'] ?? 'default';
                 $tableName = $dsn->query['tableName'] ?? 'embedding';
                 return new ClickHouseStore($client, $databaseName, $tableName);
+
+            case 'vektor':
+                class_exists(VektorStore::class) or throw new \RuntimeException('Please install symfony/ai-vektor-store to use Vektor store');
+                $storagePath = $dsn->path ?? Environment::getProjectPath().'/var/vektor';
+                $dimensions = (int) ($dsn->query['dimensions'] ?? 1536);
+                return new VektorStore($storagePath, $dimensions);
 
             default:
                 throw new \InvalidArgumentException("Unsupported store DSN scheme: {$dsn->scheme}");
