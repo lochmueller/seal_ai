@@ -19,6 +19,7 @@ use Symfony\AI\Store\Bridge\Pinecone\Store as PineconeStore;
 use Symfony\AI\Store\Bridge\Postgres\Store as PostgresStore;
 use Symfony\AI\Store\Bridge\Qdrant\Store as QdrantStore;
 use Symfony\AI\Store\Bridge\Redis\Store as RedisStore;
+use Symfony\AI\Store\Bridge\S3Vectors\Store as S3VectorsStore;
 use Symfony\AI\Store\Bridge\SurrealDb\Store as SurrealDbStore;
 use Symfony\AI\Store\Bridge\Typesense\Store as TypesenseStore;
 use Symfony\AI\Store\Bridge\Vektor\Store as VektorStore;
@@ -61,6 +62,7 @@ class StoreFactory
         // manticore://host:9308?table=my_table
         // clickhouse://host:8123?databaseName=my_db&tableName=my_table
         // vektor://default/path/to/storage?dimensions=1536
+        // s3vectors://region@default?vectorBucketName=my_bucket&indexName=my_index
 
         switch ($dsn->scheme) {
             case 'event':
@@ -203,6 +205,14 @@ class StoreFactory
                 $storagePath = $dsn->path ?? Environment::getVarPath() . '/seal-ai-vektor';
                 $dimensions = (int) ($dsn->query['dimensions'] ?? 1536);
                 return new VektorStore($storagePath, $dimensions);
+
+            case 's3vectors':
+                class_exists(S3VectorsStore::class) or throw new \RuntimeException('Please install symfony/ai-s3vectors-store to use S3 Vectors store');
+                $region = $dsn->user ?? 'us-east-1';
+                $s3VectorsClient = new \AsyncAws\S3Vectors\S3VectorsClient(['region' => $region]);
+                $vectorBucketName = $dsn->query['vectorBucketName'] ?? 'default';
+                $indexName = $dsn->query['indexName'] ?? 'default';
+                return new S3VectorsStore($s3VectorsClient, $vectorBucketName, $indexName);
 
             default:
                 throw new \InvalidArgumentException("Unsupported store DSN scheme: {$dsn->scheme}");

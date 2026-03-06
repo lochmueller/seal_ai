@@ -13,3 +13,11 @@ AI Vector search integration for EXT:seal based on symfony/ai.
 ## Configuration
 
 Example DSN for platform and store are configured as placeholder in the site configuration module.
+
+## Development
+
+Use this command to get all relevant symfony/ai packages and check missing packages:
+
+    curl -s https://raw.githubusercontent.com/symfony/ai-bundle/refs/heads/main/composer.json \
+    | sed -nE 's/"symfony\/ai-([a-z0-9-]+)-(store|platform)":/\2-\1#    &/p' \
+    | sort | cut -d'#' -f2- | sed '$ s/,$//'
