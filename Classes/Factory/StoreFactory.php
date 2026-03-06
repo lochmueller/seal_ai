@@ -200,7 +200,7 @@ class StoreFactory
 
             case 'vektor':
                 class_exists(VektorStore::class) or throw new \RuntimeException('Please install symfony/ai-vektor-store to use Vektor store');
-                $storagePath = $dsn->path ?? Environment::getProjectPath().'/var/vektor';
+                $storagePath = $dsn->path ?? Environment::getProjectPath() . '/var/vektor';
                 $dimensions = (int) ($dsn->query['dimensions'] ?? 1536);
                 return new VektorStore($storagePath, $dimensions);
 

@@ -13,6 +13,7 @@ use Symfony\AI\Store\Document\Metadata;
 use Symfony\AI\Store\Document\TextDocument;
 use Symfony\AI\Store\Indexer\DocumentIndexer;
 use Symfony\AI\Store\Indexer\DocumentProcessor;
+
 class AiIndexer implements IndexerInterface
 {
     public function __construct(protected AiBridge $aiBridge) {}
