@@ -145,7 +145,7 @@ class StoreFactory
                 class_exists(Neo4jStore::class) or throw new \RuntimeException('Please install symfony/ai-neo4j-store to use Neo4j store');
                 $endpointUrl = $this->buildEndpointUrl($dsn, 'http', 7474);
                 $username = $dsn->user ?? 'neo4j';
-                $password = $dsn->query['password'] ?? '';
+                $password = $dsn->pass ?? '';
                 $databaseName = $dsn->query['databaseName'] ?? 'neo4j';
                 $vectorIndexName = $dsn->query['vectorIndexName'] ?? 'default';
                 $nodeName = $dsn->query['nodeName'] ?? 'Document';
@@ -178,7 +178,7 @@ class StoreFactory
                 class_exists(SurrealDbStore::class) or throw new \RuntimeException('Please install symfony/ai-surreal-db-store to use SurrealDB store');
                 $endpointUrl = $this->buildEndpointUrl($dsn, 'http', 8000);
                 $user = $dsn->user ?? 'root';
-                $password = $dsn->query['password'] ?? 'root';
+                $password = $dsn->pass ?? 'root';
                 $namespace = $dsn->query['namespace'] ?? 'default';
                 $database = $dsn->query['database'] ?? 'default';
                 return new SurrealDbStore($client, $endpointUrl, $user, $password, $namespace, $database);
