@@ -152,11 +152,17 @@ composer code-test
 composer code-test-coverage
 ```
 
-### Fetching available symfony/ai packages
+### Comparing available symfony/ai packages
 
 ```bash
-curl -s https://raw.githubusercontent.com/symfony/ai-bundle/refs/heads/main/composer.json \
-  | sed -nE 's/"symfony\/ai-([a-z0-9-]+)-(store|platform)":/\2-\1#    &/p' \
-  | sort | cut -d'#' -f2- | sed '$ s/,$//'
+diff --color \
+  <(grep -E 'symfony\/ai-[a-z0-9-]+-(store|platform)' composer.json) \
+  <(curl -s https://raw.githubusercontent.com/symfony/ai-bundle/refs/heads/main/composer.json \
+  | sed -nE '/"symfony\/ai-[a-z0-9-]+-(store|platform)":/s/^    //p')
 ```
 
+### Updating available symfony/ai packages
+
+```bash
+jq --argjson updates "$(curl -sL https://raw.githubusercontent.com/symfony/ai-bundle/main/composer.json | jq '."require-dev" | with_entries(select(.key | test("^symfony/ai-.*-(store|platform)$")))')" '."require-dev" |= ((. // {}) + $updates | to_entries | sort_by(.key) | from_entries)' composer.json | sponge composer.json
+```
