@@ -24,7 +24,7 @@ class AiAdapterFactoryTest extends AbstractTest
         $site = $this->createStub(Site::class);
 
         $request = $this->createStub(ServerRequestInterface::class);
-        $request->method('getAttribute')->with('site')->willReturn($site);
+        $request->method('getAttribute')->willReturn($site);
         $GLOBALS['TYPO3_REQUEST'] = $request;
 
         $aiBridge = $this->createMock(AiBridge::class);
@@ -44,7 +44,7 @@ class AiAdapterFactoryTest extends AbstractTest
         $this->expectExceptionCode(1236891231);
 
         $request = $this->createStub(ServerRequestInterface::class);
-        $request->method('getAttribute')->with('site')->willReturn(null);
+        $request->method('getAttribute')->willReturn(null);
         $GLOBALS['TYPO3_REQUEST'] = $request;
 
         $aiBridge = $this->createStub(AiBridge::class);
