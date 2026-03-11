@@ -125,6 +125,8 @@ final class CustomPlatformListener
 
 ## Architecture
 
+![Structure overview](Documentation/Structure.png)
+
 The extension implements the `CmsIg\Seal\Adapter\AdapterInterface` with these components:
 
 - **AiAdapterFactory** — registered as SEAL adapter factory for the `ai://` scheme, initializes the bridge from the current site configuration
