@@ -33,6 +33,9 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Lochmueller\SealAi\Event\StoreFactoryEvent;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
+/**
+ * @see https://github.com/symfony/ai/issues/402
+ */
 class StoreFactory
 {
     public function __construct(

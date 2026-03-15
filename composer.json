@@ -14,7 +14,7 @@
   ],
   "require": {
     "php": "^8.3",
-    "lochmueller/seal": "^0.3",
+    "lochmueller/seal": "^1.0",
     "symfony/ai-platform": "^0.6",
     "symfony/ai-store": "^0.6",
     "typo3/cms-core": "^13.4 || ^14.1"

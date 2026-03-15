@@ -37,6 +37,9 @@ use Symfony\Component\HttpClient\HttpClient;
 use Lochmueller\SealAi\Event\PlatformFactoryEvent;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
+/**
+ * @see https://github.com/symfony/ai/issues/402
+ */
 class PlatformFactory
 {
     public function __construct(

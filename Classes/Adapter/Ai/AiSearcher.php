@@ -39,18 +39,25 @@ class AiSearcher implements SearcherInterface
 
         $vectorDocument = $vectorDocuments[0];
         $resultItems = $this->aiBridge->getStore()->query(new VectorQuery($vectorDocument->getVector()), [
-            'limit' => $search->limit ?? 10,
+            'limit' => 200,
         ]);
 
+        $start = $search->offset ?? 0;
+        $stop = $search->limit ?? 10;
+
         $items = [];
-        foreach ($resultItems as $item) {
-            /** @var VectorDocument $item */
-            $items[] = array_merge($item->getMetadata()->getArrayCopy(), ['score' => $item->getScore()]);
+        $count = 0;
+        foreach ($resultItems as $i => $item) {
+            $count++;
+            if ($i >= $start && $i < $stop) {
+                /** @var VectorDocument $item */
+                $items[] = array_merge($item->getMetadata()->getArrayCopy(), ['score' => $item->getScore()]);
+            }
         }
 
         return new Result((function () use ($items) {
             yield from $items;
-        })(), count($items), []);
+        })(), $count, []);
     }
 
     private function recursiveFindSearchTerm(array $conditions): string
@@ -72,6 +79,9 @@ class AiSearcher implements SearcherInterface
 
     public function count(Index $index): int
     {
+        // @todo https://github.com/symfony/ai/issues/1750
+        #return count($this->aiBridge->getStore());
+
         // There is no general count of store documents in symfony/ai
         return 0;
     }

@@ -1,0 +1,7 @@
+<f:if condition="{pagination.paginator.currentPageNumber}==1">
+    <!-- @todo handle Google SGE like content -->
+</f:if>
+
+<f:for each="{paginator.paginatedItems}" as="item">
+    <f:render partial="Result/Item" arguments="{item: item}"/>
+</f:for>
