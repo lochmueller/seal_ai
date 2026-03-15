@@ -35,6 +35,8 @@ class AiSearcher implements SearcherInterface
             ),
         ];
 
+        // @todo add Limiter && Cache on search term verctorizer
+
         $vectorDocuments = $this->aiBridge->getVectorizer()->vectorize($documents);
 
         $vectorDocument = $vectorDocuments[0];
