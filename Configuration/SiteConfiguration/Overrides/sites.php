@@ -15,6 +15,17 @@ $GLOBALS['SiteConfiguration']['site']['columns']['sealAiPlatformDsn'] = [
     ],
 ];
 
+$GLOBALS['SiteConfiguration']['site']['columns']['sealAiChatModel'] = [
+    'label' => $lll . 'site.sealAiChatModel',
+    'description' => $lll . 'site.sealAiChatModel.description',
+    'config' => [
+        'type' => 'input',
+        'eval' => 'trim',
+        'default' => '',
+        'placeholder' => 'google/gemini-2.0-flash',
+    ],
+];
+
 $GLOBALS['SiteConfiguration']['site']['columns']['sealAiStoreDsn'] = [
     'label' => $lll . 'site.sealAiStoreDsn',
     'description' => $lll . 'site.sealAiStoreDsn.description',
@@ -28,6 +39,6 @@ $GLOBALS['SiteConfiguration']['site']['columns']['sealAiStoreDsn'] = [
 
 $GLOBALS['SiteConfiguration']['site']['types']['0']['showitem'] = str_replace(
     ', sealSearchDsn,',
-    ', sealSearchDsn, sealAiPlatformDsn, sealAiStoreDsn, ',
+    ', sealSearchDsn, sealAiPlatformDsn, sealAiChatModel, sealAiStoreDsn, ',
     $GLOBALS['SiteConfiguration']['site']['types']['0']['showitem'],
 );
