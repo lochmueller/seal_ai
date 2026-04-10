@@ -7,8 +7,6 @@ namespace Lochmueller\SealAi\ViewHelpers;
 use Lochmueller\SealAi\AiBridge;
 use Symfony\AI\Platform\Message\Message;
 use Symfony\AI\Platform\Message\MessageBag;
-use Symfony\AI\Platform\Message\SystemMessage;
-use Symfony\AI\Platform\Message\UserMessage;
 use Symfony\AI\Platform\Result\TextResult;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
