@@ -8,8 +8,8 @@ $EM_CONF[$_EXTKEY] = [
     'category' => 'fe',
     'constraints' => [
         'depends' => [
-            'typo3' => '13.4.0-13.4.99',
-            'seal' => '0.2.0-0.99.99',
+            'typo3' => '13.4.0-14.99.99',
+            'seal' => '1.0.0-1.99.99',
             'php' => '8.3.0-8.99.99',
         ],
     ],
@@ -19,7 +19,7 @@ $EM_CONF[$_EXTKEY] = [
     'author_company' => 'HDNET GmbH & Co. KG',
     'autoload' => [
         'psr-4' => [
-            'Lochmueller\\Seal\\' => 'Classes',
+            'Lochmueller\\SealAi\\' => 'Classes',
         ],
     ],
 ];

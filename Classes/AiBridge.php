@@ -46,12 +46,29 @@ class AiBridge
     public function initialize(Site $site): void
     {
         $config = $site->getConfiguration();
+
+        $storeDsn = $config['sealAiStoreDsn'] ?? '';
+        if ($storeDsn === '') {
+            throw new \RuntimeException(
+                'Missing "sealAiStoreDsn" in site configuration. Please configure the AI Store DSN.',
+                1739091203
+            );
+        }
+
+        $platformDsn = $config['sealAiPlatformDsn'] ?? '';
+        if ($platformDsn === '') {
+            throw new \RuntimeException(
+                'Missing "sealAiPlatformDsn" in site configuration. Please configure the AI Platform DSN.',
+                1739091204
+            );
+        }
+
         // Store
-        $dsnDto = $this->dsnParser->parse($config['sealAiStoreDsn'] ?? '');
+        $dsnDto = $this->dsnParser->parse($storeDsn);
         $this->store = $this->storeFactory->fromDsn($dsnDto);
 
         // Platform
-        $dsnDto = $this->dsnParser->parse($config['sealAiPlatformDsn'] ?? '');
+        $dsnDto = $this->dsnParser->parse($platformDsn);
         $this->platform = $this->platformFactory->fromDsn($dsnDto);
 
         $model = $dsnDto->query['model'] ?? '';

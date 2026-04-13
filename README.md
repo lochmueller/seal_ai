@@ -7,7 +7,7 @@ Enables semantic (vector-based) search in TYPO3 by bridging the SEAL search abst
 ## Requirements
 
 - PHP 8.3+
-- TYPO3 13.4 or 14.1
+- TYPO3 13.4 or 14.2
 - [EXT:index](https://github.com/lochmueller/index) & [EXT:seal](https://github.com/lochmueller/seal) installed and configured
 
 ## Installation

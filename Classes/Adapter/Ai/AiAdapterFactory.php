@@ -27,8 +27,8 @@ class AiAdapterFactory implements AdapterFactoryInterface
 
     public function createAdapter(array $dsn): AdapterInterface
     {
-        /** @var ServerRequestInterface $request */
-        $request = $GLOBALS['TYPO3_REQUEST'];
+        $request = $GLOBALS['TYPO3_REQUEST'] ?? null;
+        $request instanceof ServerRequestInterface or throw new \RuntimeException('No TYPO3 request available for AI adapter build', 1236891232);
 
         /** @var SiteInterface $site */
         $site = $request->getAttribute('site');

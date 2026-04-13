@@ -48,7 +48,7 @@ class PlatformFactory
 
     public function fromDsn(DsnDto $dsn): PlatformInterface
     {
-        $apiKey = $dsn->user;
+        $apiKey = $dsn->user ?? '';
         $client = HttpClient::create();
 
         // DSN Examples:

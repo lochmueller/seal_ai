@@ -22,12 +22,12 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 abstract class AbstractTest extends UnitTestCase
 {
-    public function getStore()
+    public function getStore(): Store
     {
         return new Store();
     }
 
-    public function getVectorizer()
+    public function getVectorizer(): Vectorizer
     {
         return new Vectorizer(new class implements PlatformInterface {
             public function invoke(string $model, object|array|string $input, array $options = []): DeferredResult
