@@ -39,6 +39,9 @@ jobs:
           tools: composer:v2
           coverage: none
 
+      - name: Avoid problems with insecure extension in testing
+        run: composer config audit.block-insecure false
+
       - name: Require the right versions
         run: composer require typo3/cms-core:${{ matrix.typo3 }} --no-update
 
