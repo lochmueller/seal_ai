@@ -66,7 +66,7 @@ class AiBridgeTest extends AbstractTest
         $dsnParser = $this->createStub(DsnParser::class);
         $dsnParser->method('parse')->willReturnCallback(
             fn(string $dsn): DsnDto => match ($dsn) {
-                '' => $storeDsn,
+                'memory://default' => $storeDsn,
                 default => $platformDsn,
             }
         );
@@ -78,7 +78,10 @@ class AiBridgeTest extends AbstractTest
         $platformFactory->method('fromDsn')->willReturn($platform);
 
         $site = $this->createStub(Site::class);
-        $site->method('getConfiguration')->willReturn([]);
+        $site->method('getConfiguration')->willReturn([
+            'sealAiStoreDsn' => 'memory://default',
+            'sealAiPlatformDsn' => 'openai://key@default',
+        ]);
 
         $bridge = new AiBridge($platformFactory, $storeFactory, $dsnParser);
 
@@ -100,7 +103,7 @@ class AiBridgeTest extends AbstractTest
         $dsnParser = $this->createStub(DsnParser::class);
         $dsnParser->method('parse')->willReturnCallback(
             fn(string $dsn): DsnDto => match ($dsn) {
-                '' => $storeDsn,
+                'memory://default' => $storeDsn,
                 default => $platformDsn,
             }
         );
@@ -112,7 +115,10 @@ class AiBridgeTest extends AbstractTest
         $platformFactory->method('fromDsn')->willReturn($platform);
 
         $site = $this->createStub(Site::class);
-        $site->method('getConfiguration')->willReturn([]);
+        $site->method('getConfiguration')->willReturn([
+            'sealAiStoreDsn' => 'memory://default',
+            'sealAiPlatformDsn' => 'openai://key@default?model=',
+        ]);
 
         $bridge = new AiBridge($platformFactory, $storeFactory, $dsnParser);
 
@@ -139,7 +145,10 @@ class AiBridgeTest extends AbstractTest
         $platformFactory->method('fromDsn')->willReturn($platform);
 
         $site = $this->createStub(Site::class);
-        $site->method('getConfiguration')->willReturn([]);
+        $site->method('getConfiguration')->willReturn([
+            'sealAiStoreDsn' => 'memory://default',
+            'sealAiPlatformDsn' => 'openai://key@default?model=my-model',
+        ]);
 
         $bridge = new AiBridge($platformFactory, $storeFactory, $dsnParser);
         $bridge->initialize($site);
