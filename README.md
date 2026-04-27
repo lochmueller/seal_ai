@@ -4,6 +4,8 @@ AI Vector search integration for [EXT:seal](https://github.com/lochmueller/seal)
 
 Enables semantic (vector-based) search in TYPO3 by bridging the SEAL search abstraction with the Symfony AI platform and store components. Documents are automatically vectorized via configurable embedding models and stored in a vector database of your choice.
 
+This extension was funded by the [TYPO3 Association](https://typo3.org): [community ideas I](https://typo3.org/article/members-have-selected-five-ideas-to-be-funded-in-quarter-3-2025) / [community idea II](https://talk.typo3.org/t/ext-seal-ecosystem-expansion-advanced-search-ai-vector-integration-tim-lochmuller/6594) & [first blogpost](https://typo3.org/article/typo3-meets-seal-a-breath-of-fresh-air-for-search) / second blogpost (WIP)
+
 ## Requirements
 
 - PHP 8.3+
