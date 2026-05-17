@@ -5,32 +5,32 @@ declare(strict_types=1);
 namespace Lochmueller\SealAi\Factory;
 
 use Lochmueller\Seal\Dto\DsnDto;
-use Symfony\AI\Store\Bridge\ClickHouse\Store as ClickHouseStore;
-use Symfony\AI\Store\Bridge\Cloudflare\Store as CloudflareStore;
-use Symfony\AI\Store\Bridge\Elasticsearch\Store as ElasticsearchStore;
-use Symfony\AI\Store\Bridge\ManticoreSearch\Store as ManticoreSearchStore;
-use Symfony\AI\Store\Bridge\MariaDb\Store as MariaDbStore;
-use Symfony\AI\Store\Bridge\Meilisearch\Store as MeilisearchStore;
-use Symfony\AI\Store\Bridge\Milvus\Store as MilvusStore;
-use Symfony\AI\Store\Bridge\MongoDb\Store as MongoDbStore;
-use Symfony\AI\Store\Bridge\Neo4j\Store as Neo4jStore;
-use Symfony\AI\Store\Bridge\OpenSearch\Store as OpenSearchStore;
-use Symfony\AI\Store\Bridge\Pinecone\Store as PineconeStore;
-use Symfony\AI\Store\Bridge\Postgres\Store as PostgresStore;
-use Symfony\AI\Store\Bridge\Qdrant\Store as QdrantStore;
-use Symfony\AI\Store\Bridge\Redis\Store as RedisStore;
-use Symfony\AI\Store\Bridge\S3Vectors\Store as S3VectorsStore;
-use Symfony\AI\Store\Bridge\SurrealDb\Store as SurrealDbStore;
-use Symfony\AI\Store\Bridge\Typesense\Store as TypesenseStore;
-use Symfony\AI\Store\Bridge\Vektor\Store as VektorStore;
-use Symfony\AI\Store\Bridge\Weaviate\Store as WeaviateStore;
+use Symfony\AI\Store\Bridge\ClickHouse as ClickHouseBridge;
+use Symfony\AI\Store\Bridge\Cloudflare as CloudflareBridge;
+use Symfony\AI\Store\Bridge\Elasticsearch as ElasticsearchBridge;
+use Symfony\AI\Store\Bridge\ManticoreSearch as ManticoreSearchBridge;
+use Symfony\AI\Store\Bridge\MariaDb as MariaDbBridge;
+use Symfony\AI\Store\Bridge\Meilisearch as MeilisearchBridge;
+use Symfony\AI\Store\Bridge\Milvus as MilvusBridge;
+use Symfony\AI\Store\Bridge\MongoDb as MongoDbBridge;
+use Symfony\AI\Store\Bridge\Neo4j as Neo4jBridge;
+use Symfony\AI\Store\Bridge\OpenSearch as OpenSearchBridge;
+use Symfony\AI\Store\Bridge\Pinecone as PineconeBridge;
+use Symfony\AI\Store\Bridge\Postgres as PostgresBridge;
+use Symfony\AI\Store\Bridge\Qdrant as QdrantBridge;
+use Symfony\AI\Store\Bridge\Redis as RedisBridge;
+use Symfony\AI\Store\Bridge\S3Vectors as S3VectorsBridge;
+use Symfony\AI\Store\Bridge\SurrealDb as SurrealDbBridge;
+use Symfony\AI\Store\Bridge\Typesense as TypesenseBridge;
+use Symfony\AI\Store\Bridge\Vektor as VektorBridge;
+use Symfony\AI\Store\Bridge\Weaviate as WeaviateBridge;
 use Symfony\AI\Store\ManagedStoreInterface;
 use Symfony\AI\Store\StoreInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use Lochmueller\SealAi\Event\StoreFactoryEvent;
+use Lochmueller\SealAi\Event\CreateStoreEvent;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -69,62 +69,60 @@ class StoreFactory
 
         switch ($dsn->scheme) {
             case 'event':
-                $event = $this->eventDispatcher->dispatch(new StoreFactoryEvent($dsn));
+                $event = $this->eventDispatcher->dispatch(new CreateStoreEvent($dsn));
                 return $event->getStore() ?? throw new \RuntimeException('No store provided by event listener for DSN scheme "event"', 1739091201);
 
             case 'mariadb':
-                class_exists(MariaDbStore::class) or throw new \RuntimeException('Please install symfony/ai-maria-db-store to use MariaDB store');
+                class_exists(MariaDbBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-maria-db-store to use MariaDB store');
                 $typo3Connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('tt_content');
                 $tableName = $dsn->query['tableName'] ?? 'tx_sealai_data';
                 $indexName = $dsn->query['indexName'] ?? 'embedding';
                 $vectorFieldName = $dsn->query['vectorFieldName'] ?? 'embedding';
-                return MariaDbStore::fromDbal($typo3Connection, $tableName, $indexName, $vectorFieldName);
+                return MariaDbBridge\Store::fromDbal($typo3Connection, $tableName, $indexName, $vectorFieldName);
 
             case 'postgres':
             case 'postgresql':
-                class_exists(PostgresStore::class) or throw new \RuntimeException('Please install symfony/ai-postgres-store to use PostgreSQL store');
+                class_exists(PostgresBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-postgres-store to use PostgreSQL store');
                 $typo3Connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('tt_content');
                 $tableName = $dsn->query['tableName'] ?? 'tx_sealai_data';
                 $vectorFieldName = $dsn->query['vectorFieldName'] ?? 'embedding';
-                return PostgresStore::fromDbal($typo3Connection, $tableName, $vectorFieldName);
+                return PostgresBridge\StoreFactory::createStoreFromDbal($typo3Connection, $tableName, $vectorFieldName);
 
             case 'qdrant':
-                class_exists(QdrantStore::class) or throw new \RuntimeException('Please install symfony/ai-qdrant-store to use Qdrant store');
+                class_exists(QdrantBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-qdrant-store to use Qdrant store');
                 $endpointUrl = $this->buildEndpointUrl($dsn, 'http', 6333);
-                $apiKey = $dsn->user ?? '';
                 $collectionName = $dsn->query['collectionName'] ?? 'default';
                 $dimensions = (int) ($dsn->query['dimensions'] ?? 1536);
-                return new QdrantStore($client, $endpointUrl, $apiKey, $collectionName, $dimensions);
+                return QdrantBridge\StoreFactory::create($collectionName, $endpointUrl, $dsn->user ?: null, null, $dimensions);
 
             case 'elasticsearch':
-                class_exists(ElasticsearchStore::class) or throw new \RuntimeException('Please install symfony/ai-elasticsearch-store to use Elasticsearch store');
+                class_exists(ElasticsearchBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-elasticsearch-store to use Elasticsearch store');
                 $endpoint = $this->buildEndpointUrl($dsn, 'http', 9200);
                 $indexName = $dsn->query['indexName'] ?? 'default';
-                return new ElasticsearchStore($client, $endpoint, $indexName);
+                return new ElasticsearchBridge\Store($client, $endpoint, $indexName);
 
             case 'opensearch':
-                class_exists(OpenSearchStore::class) or throw new \RuntimeException('Please install symfony/ai-open-search-store to use OpenSearch store');
+                class_exists(OpenSearchBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-open-search-store to use OpenSearch store');
                 $endpoint = $this->buildEndpointUrl($dsn, 'http', 9200);
                 $indexName = $dsn->query['indexName'] ?? 'default';
-                return new OpenSearchStore($client, $endpoint, $indexName);
+                return new OpenSearchBridge\Store($client, $endpoint, $indexName);
 
             case 'meilisearch':
-                class_exists(MeilisearchStore::class) or throw new \RuntimeException('Please install symfony/ai-meilisearch-store to use Meilisearch store');
+                class_exists(MeilisearchBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-meilisearch-store to use Meilisearch store');
                 $endpointUrl = $this->buildEndpointUrl($dsn, 'http', 7700);
-                $apiKey = $dsn->user ?? '';
                 $indexName = $dsn->query['indexName'] ?? 'default';
-                return new MeilisearchStore($client, $endpointUrl, $apiKey, $indexName);
+                return MeilisearchBridge\StoreFactory::create($indexName, $endpointUrl, $dsn->user ?: null);
 
             case 'milvus':
-                class_exists(MilvusStore::class) or throw new \RuntimeException('Please install symfony/ai-milvus-store to use Milvus store');
+                class_exists(MilvusBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-milvus-store to use Milvus store');
                 $endpointUrl = $this->buildEndpointUrl($dsn, 'http', 19530);
                 $apiKey = $dsn->user ?? '';
                 $database = $dsn->query['database'] ?? 'default';
                 $collection = $dsn->query['collection'] ?? 'default';
-                return new MilvusStore($client, $endpointUrl, $apiKey, $database, $collection);
+                return new MilvusBridge\Store($client, $endpointUrl, $apiKey, $database, $collection);
 
             case 'redis':
-                class_exists(RedisStore::class) or throw new \RuntimeException('Please install symfony/ai-redis-store to use Redis store');
+                class_exists(RedisBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-redis-store to use Redis store');
                 $redis = new \Redis();
                 $host = $dsn->host ?? 'localhost';
                 $port = $dsn->port ?? 6379;
@@ -133,89 +131,88 @@ class StoreFactory
                     $redis->auth($dsn->user);
                 }
                 $indexName = $dsn->query['indexName'] ?? 'default';
-                return new RedisStore($redis, $indexName);
+                return new RedisBridge\Store($redis, $indexName);
 
             case 'weaviate':
-                class_exists(WeaviateStore::class) or throw new \RuntimeException('Please install symfony/ai-weaviate-store to use Weaviate store');
+                class_exists(WeaviateBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-weaviate-store to use Weaviate store');
                 $endpointUrl = $this->buildEndpointUrl($dsn, 'http', 8080);
-                $apiKey = $dsn->user ?? '';
                 $collection = $dsn->query['collection'] ?? 'default';
-                return new WeaviateStore($client, $endpointUrl, $apiKey, $collection);
+                return WeaviateBridge\StoreFactory::create($collection, $endpointUrl, $dsn->user ?: null);
 
             case 'typesense':
-                class_exists(TypesenseStore::class) or throw new \RuntimeException('Please install symfony/ai-typesense-store to use Typesense store');
+                class_exists(TypesenseBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-typesense-store to use Typesense store');
                 $endpointUrl = $this->buildEndpointUrl($dsn, 'http', 8108);
                 $apiKey = $dsn->user ?? '';
                 $collection = $dsn->query['collection'] ?? 'default';
-                return new TypesenseStore($client, $endpointUrl, $apiKey, $collection);
+                return new TypesenseBridge\Store($client, $endpointUrl, $apiKey, $collection);
 
             case 'neo4j':
-                class_exists(Neo4jStore::class) or throw new \RuntimeException('Please install symfony/ai-neo4j-store to use Neo4j store');
+                class_exists(Neo4jBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-neo4j-store to use Neo4j store');
                 $endpointUrl = $this->buildEndpointUrl($dsn, 'http', 7474);
                 $username = $dsn->user ?? 'neo4j';
                 $password = $dsn->pass ?? '';
                 $databaseName = $dsn->query['databaseName'] ?? 'neo4j';
                 $vectorIndexName = $dsn->query['vectorIndexName'] ?? 'default';
                 $nodeName = $dsn->query['nodeName'] ?? 'Document';
-                return new Neo4jStore($client, $endpointUrl, $username, $password, $databaseName, $vectorIndexName, $nodeName);
+                return new Neo4jBridge\Store($client, $endpointUrl, $username, $password, $databaseName, $vectorIndexName, $nodeName);
 
             case 'cloudflare':
-                class_exists(CloudflareStore::class) or throw new \RuntimeException('Please install symfony/ai-cloudflare-store to use Cloudflare store');
+                class_exists(CloudflareBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-cloudflare-store to use Cloudflare store');
                 $accountId = $dsn->query['accountId'] ?? '';
                 $apiKey = $dsn->user ?? '';
                 $index = $dsn->query['index'] ?? 'default';
-                return new CloudflareStore($client, $accountId, $apiKey, $index);
+                return new CloudflareBridge\Store($client, $accountId, $apiKey, $index);
 
             case 'pinecone':
-                class_exists(PineconeStore::class) or throw new \RuntimeException('Please install symfony/ai-pinecone-store to use Pinecone store');
+                class_exists(PineconeBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-pinecone-store to use Pinecone store');
                 $apiKey = $dsn->user ?? '';
                 $pinecone = new \Probots\Pinecone\Client($apiKey);
                 $indexName = $dsn->query['indexName'] ?? 'default';
-                return new PineconeStore($pinecone, $indexName);
+                return new PineconeBridge\Store($pinecone, $indexName);
 
             case 'mongodb':
-                class_exists(MongoDbStore::class) or throw new \RuntimeException('Please install symfony/ai-mongo-db-store to use MongoDB store');
+                class_exists(MongoDbBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-mongo-db-store to use MongoDB store');
                 $mongoUrl = $this->buildEndpointUrl($dsn, 'mongodb', 27017);
                 $mongoClient = new \MongoDB\Client($mongoUrl);
                 $databaseName = $dsn->query['databaseName'] ?? 'default';
                 $collectionName = $dsn->query['collectionName'] ?? 'default';
                 $indexName = $dsn->query['indexName'] ?? 'default';
-                return new MongoDbStore($mongoClient, $databaseName, $collectionName, $indexName);
+                return new MongoDbBridge\Store($mongoClient, $databaseName, $collectionName, $indexName);
 
             case 'surrealdb':
-                class_exists(SurrealDbStore::class) or throw new \RuntimeException('Please install symfony/ai-surreal-db-store to use SurrealDB store');
+                class_exists(SurrealDbBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-surreal-db-store to use SurrealDB store');
                 $endpointUrl = $this->buildEndpointUrl($dsn, 'http', 8000);
                 $user = $dsn->user ?? 'root';
                 $password = $dsn->pass ?? 'root';
                 $namespace = $dsn->query['namespace'] ?? 'default';
                 $database = $dsn->query['database'] ?? 'default';
-                return new SurrealDbStore($client, $endpointUrl, $user, $password, $namespace, $database);
+                return new SurrealDbBridge\Store($client, $endpointUrl, $user, $password, $namespace, $database);
 
             case 'manticore':
-                class_exists(ManticoreSearchStore::class) or throw new \RuntimeException('Please install symfony/ai-manticore-search-store to use ManticoreSearch store');
+                class_exists(ManticoreSearchBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-manticore-search-store to use ManticoreSearch store');
                 $host = $this->buildEndpointUrl($dsn, 'http', 9308);
                 $table = $dsn->query['table'] ?? 'default';
-                return new ManticoreSearchStore($client, $host, $table);
+                return new ManticoreSearchBridge\Store($client, $host, $table);
 
             case 'clickhouse':
-                class_exists(ClickHouseStore::class) or throw new \RuntimeException('Please install symfony/ai-click-house-store to use ClickHouse store');
+                class_exists(ClickHouseBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-click-house-store to use ClickHouse store');
                 $databaseName = $dsn->query['databaseName'] ?? 'default';
                 $tableName = $dsn->query['tableName'] ?? 'embedding';
-                return new ClickHouseStore($client, $databaseName, $tableName);
+                return new ClickHouseBridge\Store($client, $databaseName, $tableName);
 
             case 'vektor':
-                class_exists(VektorStore::class) or throw new \RuntimeException('Please install symfony/ai-vektor-store to use Vektor store');
+                class_exists(VektorBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-vektor-store to use Vektor store');
                 $storagePath = $dsn->path ?? Environment::getVarPath() . '/seal-ai-vektor';
                 $dimensions = (int) ($dsn->query['dimensions'] ?? 1536);
-                return new VektorStore($storagePath, $dimensions);
+                return new VektorBridge\Store($storagePath, $dimensions);
 
             case 's3vectors':
-                class_exists(S3VectorsStore::class) or throw new \RuntimeException('Please install symfony/ai-s3vectors-store to use S3 Vectors store');
+                class_exists(S3VectorsBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-s3vectors-store to use S3 Vectors store');
                 $region = $dsn->user ?? 'us-east-1';
                 $s3VectorsClient = new \AsyncAws\S3Vectors\S3VectorsClient(['region' => $region]);
                 $vectorBucketName = $dsn->query['vectorBucketName'] ?? 'default';
                 $indexName = $dsn->query['indexName'] ?? 'default';
-                return new S3VectorsStore($s3VectorsClient, $vectorBucketName, $indexName);
+                return new S3VectorsBridge\Store($s3VectorsClient, $vectorBucketName, $indexName);
 
             default:
                 throw new \InvalidArgumentException("Unsupported store DSN scheme: {$dsn->scheme}");

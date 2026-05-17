@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Lochmueller\SealAi\Tests\Unit\Factory;
 
 use Lochmueller\Seal\Dto\DsnDto;
-use Lochmueller\SealAi\Event\StoreFactoryEvent;
+use Lochmueller\SealAi\Event\CreateStoreEvent;
 use Lochmueller\SealAi\Factory\StoreFactory;
 use Lochmueller\SealAi\Tests\Unit\AbstractTest;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -24,8 +24,8 @@ class StoreFactoryTest extends AbstractTest
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $eventDispatcher->expects(self::once())
             ->method('dispatch')
-            ->with(self::callback(static fn(StoreFactoryEvent $event): bool => $event->getDsn() === $dsn))
-            ->willReturnCallback(static function (StoreFactoryEvent $event) use ($store): StoreFactoryEvent {
+            ->with(self::callback(static fn(CreateStoreEvent $event): bool => $event->getDsn() === $dsn))
+            ->willReturnCallback(static function (CreateStoreEvent $event) use ($store): CreateStoreEvent {
                 $event->setStore($store);
                 return $event;
             });
@@ -42,7 +42,7 @@ class StoreFactoryTest extends AbstractTest
 
         $eventDispatcher = $this->createStub(EventDispatcherInterface::class);
         $eventDispatcher->method('dispatch')
-            ->willReturnCallback(static fn(StoreFactoryEvent $event): StoreFactoryEvent => $event);
+            ->willReturnCallback(static fn(CreateStoreEvent $event): CreateStoreEvent => $event);
 
         $factory = new StoreFactory($eventDispatcher);
 

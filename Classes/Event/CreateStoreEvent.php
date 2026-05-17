@@ -8,7 +8,7 @@ use Lochmueller\Seal\Dto\DsnDto;
 use Symfony\AI\Store\ManagedStoreInterface;
 use Symfony\AI\Store\StoreInterface;
 
-final class StoreFactoryEvent
+final class CreateStoreEvent
 {
     private (StoreInterface&ManagedStoreInterface)|null $store = null;
 

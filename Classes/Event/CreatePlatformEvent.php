@@ -7,7 +7,7 @@ namespace Lochmueller\SealAi\Event;
 use Lochmueller\Seal\Dto\DsnDto;
 use Symfony\AI\Platform\PlatformInterface;
 
-final class PlatformFactoryEvent
+final class CreatePlatformEvent
 {
     private ?PlatformInterface $platform = null;
 

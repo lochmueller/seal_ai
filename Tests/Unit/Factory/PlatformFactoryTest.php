@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Lochmueller\SealAi\Tests\Unit\Factory;
 
 use Lochmueller\Seal\Dto\DsnDto;
-use Lochmueller\SealAi\Event\PlatformFactoryEvent;
+use Lochmueller\SealAi\Event\CreatePlatformEvent;
 use Lochmueller\SealAi\Factory\PlatformFactory;
 use Lochmueller\SealAi\Tests\Unit\AbstractTest;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -21,8 +21,8 @@ class PlatformFactoryTest extends AbstractTest
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $eventDispatcher->expects(self::once())
             ->method('dispatch')
-            ->with(self::callback(static fn(PlatformFactoryEvent $event): bool => $event->getDsn() === $dsn))
-            ->willReturnCallback(static function (PlatformFactoryEvent $event) use ($platform): PlatformFactoryEvent {
+            ->with(self::callback(static fn(CreatePlatformEvent $event): bool => $event->getDsn() === $dsn))
+            ->willReturnCallback(static function (CreatePlatformEvent $event) use ($platform): CreatePlatformEvent {
                 $event->setPlatform($platform);
                 return $event;
             });
@@ -39,7 +39,7 @@ class PlatformFactoryTest extends AbstractTest
 
         $eventDispatcher = $this->createStub(EventDispatcherInterface::class);
         $eventDispatcher->method('dispatch')
-            ->willReturnCallback(static fn(PlatformFactoryEvent $event): PlatformFactoryEvent => $event);
+            ->willReturnCallback(static fn(CreatePlatformEvent $event): CreatePlatformEvent => $event);
 
         $factory = new PlatformFactory($eventDispatcher);
 
