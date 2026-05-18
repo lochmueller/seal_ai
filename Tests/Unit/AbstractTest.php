@@ -40,7 +40,7 @@ abstract class AbstractTest extends UnitTestCase
 
                     public function convert(RawResultInterface $result, array $options = []): ResultInterface
                     {
-                        return new VectorResult(new Vector([0.1, 0.2, 0.3]));
+                        return new VectorResult([new Vector([0.1, 0.2, 0.3])]);
                     }
 
                     public function getTokenUsageExtractor(): ?TokenUsageExtractorInterface
