@@ -30,7 +30,7 @@ abstract class AbstractTest extends UnitTestCase
     public function getVectorizer(): Vectorizer
     {
         return new Vectorizer(new class implements PlatformInterface {
-            public function invoke(string $model, object|array|string $input, array $options = []): DeferredResult
+            public function invoke(string|Model $model, object|array|string $input, array $options = []): DeferredResult
             {
                 $resultConverter = new class implements ResultConverterInterface {
                     public function supports(Model $model): bool
