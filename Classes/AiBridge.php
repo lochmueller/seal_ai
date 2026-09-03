@@ -72,7 +72,7 @@ class AiBridge
         $this->platform = $this->platformFactory->fromDsn($dsnDto);
 
         $model = $dsnDto->query['model'] ?? '';
-        if ($model === '') {
+        if (!\is_string($model) || $model === '') {
             throw new \RuntimeException(
                 'Missing "model" query parameter in sealAiPlatformDsn. Example: openai://key@default?model=text-embedding-3-small',
                 1739091202

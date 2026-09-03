@@ -16,7 +16,10 @@ class AiSchemaManager implements SchemaManagerInterface
 
     public function existIndex(Index $index): bool
     {
-        return $this->aiBridge->getStore()->exists();
+        // symfony/ai offers no way to check the existence of a store.
+        // ManagedStoreInterface only knows setup() and drop(), and setup() is
+        // idempotent in every bridge, so we always report the index as existing.
+        return true;
     }
 
     public function dropIndex(Index $index, array $options = []): ?TaskInterface
@@ -28,7 +31,7 @@ class AiSchemaManager implements SchemaManagerInterface
 
     public function createIndex(Index $index, array $options = []): ?TaskInterface
     {
-        $this->aiBridge->getStore()->create();
+        $this->aiBridge->getStore()->setup();
 
         return new SyncTask(null);
     }

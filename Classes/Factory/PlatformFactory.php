@@ -6,6 +6,7 @@ namespace Lochmueller\SealAi\Factory;
 
 use Lochmueller\Seal\Dto\DsnDto;
 use Symfony\AI\Platform\PlatformInterface;
+use Symfony\AI\Platform\Bridge\OpenResponses as OpenResponsesBridge;
 use Symfony\AI\Platform\Bridge\OpenRouter as OpenRouterBridge;
 use Symfony\AI\Platform\Bridge\OpenAi as OpenAiBridge;
 use Symfony\AI\Platform\Bridge\Anthropic as AnthropicBridge;
@@ -74,12 +75,14 @@ class PlatformFactory
         // docker://host:12434
         // transformers://
         // generic://host?api_key=api-key
+        // openresponses://api-key@host?path=/v1/responses
         // azure-openai://api-key@host?deployment=deployment&api_version=api-version
         // azure-meta://api-key@host
 
         switch ($dsn->scheme) {
             case 'event':
-                $event = $this->eventDispatcher->dispatch(new CreatePlatformEvent($dsn));
+                $event = new CreatePlatformEvent($dsn);
+                $this->eventDispatcher->dispatch($event);
                 return $event->getPlatform() ?? throw new \RuntimeException('No platform provided by event listener for DSN scheme "event"', 1739091200);
 
             case 'openai':
@@ -101,9 +104,9 @@ class PlatformFactory
             case 'vertex':
             case 'vertexai':
                 class_exists(VertexAiBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-vertex-ai-platform to use VertexAI platform');
-                $location = $dsn->host ?? $dsn->query['location'] ?? '';
-                $projectId = $dsn->query['project_id'] ?? '';
-                $vertexApiKey = $dsn->query['api_key'] ?? $apiKey;
+                $location = $dsn->host ?? $this->queryString($dsn, 'location', '');
+                $projectId = $this->queryString($dsn, 'project_id', '');
+                $vertexApiKey = $this->queryString($dsn, 'api_key', $apiKey);
                 return VertexAiBridge\Factory::createPlatform($location, $projectId, $vertexApiKey, $client);
 
             case 'bedrock':
@@ -116,13 +119,13 @@ class PlatformFactory
 
             case 'ollama':
                 class_exists(OllamaBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-ollama-platform to use Ollama platform');
-                $hostUrl = $dsn->host ? ($dsn->port ? "http://{$dsn->host}:{$dsn->port}" : "http://{$dsn->host}") : 'http://localhost:11434';
+                $hostUrl = $this->buildBaseUrl($dsn, 'http', 'http://localhost:11434');
                 return OllamaBridge\Factory::createPlatform($hostUrl, httpClient: $client);
 
             case 'huggingface':
                 class_exists(HuggingFaceBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-hugging-face-platform to use HuggingFace platform');
-                $provider = $dsn->query['provider'] ?? HuggingFaceBridge\Provider::HF_INFERENCE;
-                return HuggingFaceBridge\Factory::createPlatform($apiKey, $provider);
+                $provider = $this->queryString($dsn, 'provider', HuggingFaceBridge\Provider::HF_INFERENCE);
+                return HuggingFaceBridge\Factory::createPlatform($apiKey, $provider, $client);
 
             case 'replicate':
                 class_exists(ReplicateBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-replicate-platform to use Replicate platform');
@@ -130,7 +133,7 @@ class PlatformFactory
 
             case 'lmstudio':
                 class_exists(LmStudioBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-lm-studio-platform to use LmStudio platform');
-                $baseUrl = $dsn->host ? ($dsn->port ? "http://{$dsn->host}:{$dsn->port}" : "http://{$dsn->host}") : 'http://localhost:1234';
+                $baseUrl = $this->buildBaseUrl($dsn, 'http', 'http://localhost:1234');
                 return LmStudioBridge\Factory::createPlatform($baseUrl, $client);
 
             case 'albert':
@@ -140,13 +143,13 @@ class PlatformFactory
 
             case 'cartesia':
                 class_exists(CartesiaBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-cartesia-platform to use Cartesia platform');
-                $version = $dsn->query['version'] ?? 'v1';
+                $version = $this->queryString($dsn, 'version', 'v1');
                 return CartesiaBridge\Factory::createPlatform($apiKey, $version, $client);
 
             case 'elevenlabs':
                 class_exists(ElevenLabsBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-eleven-labs-platform to use ElevenLabs platform');
-                $hostUrl = $dsn->host ? ($dsn->port ? "https://{$dsn->host}:{$dsn->port}" : "https://{$dsn->host}") : 'https://api.elevenlabs.io/v1';
-                return ElevenLabsBridge\Factory::createPlatform($apiKey, $hostUrl, $client);
+                $hostUrl = $this->buildBaseUrl($dsn, 'https', 'https://api.elevenlabs.io/v1');
+                return ElevenLabsBridge\Factory::createPlatform($hostUrl, $apiKey, $client);
 
             case 'perplexity':
                 class_exists(PerplexityBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-perplexity-platform to use Perplexity platform');
@@ -170,17 +173,17 @@ class PlatformFactory
 
             case 'decart':
                 class_exists(DecartBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-decart-platform to use Decart platform');
-                $hostUrl = $dsn->host ? ($dsn->port ? "https://{$dsn->host}:{$dsn->port}" : "https://{$dsn->host}") : 'https://api.decart.ai/v1';
+                $hostUrl = $this->buildBaseUrl($dsn, 'https', 'https://api.decart.ai/v1');
                 return DecartBridge\Factory::createPlatform($apiKey, $hostUrl, $client);
 
             case 'aimlapi':
                 class_exists(AiMlApiBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-ai-ml-api-platform to use AiMlApi platform');
-                $baseUrl = $dsn->host ? ($dsn->port ? "https://{$dsn->host}:{$dsn->port}" : "https://{$dsn->host}") : 'https://api.aimlapi.com';
+                $baseUrl = $this->buildBaseUrl($dsn, 'https', 'https://api.aimlapi.com');
                 return AiMlApiBridge\Factory::createPlatform($apiKey, $client, baseUrl: $baseUrl);
 
             case 'docker':
                 class_exists(DockerModelRunnerBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-docker-model-runner-platform to use Docker ModelRunner platform');
-                $hostUrl = $dsn->host ? ($dsn->port ? "http://{$dsn->host}:{$dsn->port}" : "http://{$dsn->host}") : 'http://localhost:12434';
+                $hostUrl = $this->buildBaseUrl($dsn, 'http', 'http://localhost:12434');
                 return DockerModelRunnerBridge\Factory::createPlatform($hostUrl, $client);
 
             case 'transformers':
@@ -189,24 +192,50 @@ class PlatformFactory
 
             case 'generic':
                 class_exists(GenericBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-generic-platform to use Generic platform');
-                $baseUrl = $dsn->host ? ($dsn->port ? "https://{$dsn->host}:{$dsn->port}" : "https://{$dsn->host}") : '';
-                $genericApiKey = $dsn->query['api_key'] ?? $apiKey;
+                $baseUrl = $this->buildBaseUrl($dsn, 'https', '');
+                $genericApiKey = $this->queryString($dsn, 'api_key', $apiKey);
                 return GenericBridge\Factory::createPlatform($baseUrl, $genericApiKey, $client);
+
+            case 'openresponses':
+                class_exists(OpenResponsesBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-open-responses-platform to use OpenResponses platform');
+                $baseUrl = $this->buildBaseUrl($dsn, 'https');
+                $responsesPath = $this->queryString($dsn, 'path', '/v1/responses');
+                return OpenResponsesBridge\Factory::createPlatform($baseUrl, $apiKey ?: null, $client, responsesPath: $responsesPath);
 
             case 'azure-openai':
                 class_exists(AzureBridge\OpenAi\Factory::class) or throw new \RuntimeException('Please install symfony/ai-azure-platform to use Azure OpenAI platform');
-                $baseUrl = $dsn->host ? ($dsn->port ? "https://{$dsn->host}:{$dsn->port}" : "https://{$dsn->host}") : '';
-                $deployment = $dsn->query['deployment'] ?? '';
-                $apiVersion = $dsn->query['api_version'] ?? '2023-12-01-preview';
+                $baseUrl = $this->buildBaseUrl($dsn, 'https', '');
+                $deployment = $this->queryString($dsn, 'deployment', '');
+                $apiVersion = $this->queryString($dsn, 'api_version', '2023-12-01-preview');
                 return AzureBridge\OpenAi\Factory::createPlatform($baseUrl, $deployment, $apiVersion, $apiKey, $client);
 
             case 'azure-meta':
                 class_exists(AzureBridge\Meta\Factory::class) or throw new \RuntimeException('Please install symfony/ai-azure-platform to use Azure Meta platform');
-                $baseUrl = $dsn->host ? ($dsn->port ? "https://{$dsn->host}:{$dsn->port}" : "https://{$dsn->host}") : '';
+                $baseUrl = $this->buildBaseUrl($dsn, 'https', '');
                 return AzureBridge\Meta\Factory::createPlatform($baseUrl, $apiKey, $client);
 
             default:
                 throw new \InvalidArgumentException("Unsupported DSN scheme: {$dsn->scheme}");
         }
+    }
+
+    private function buildBaseUrl(DsnDto $dsn, string $scheme, string $default = ''): string
+    {
+        if (!$dsn->host) {
+            return $default;
+        }
+
+        return $dsn->port ? "{$scheme}://{$dsn->host}:{$dsn->port}" : "{$scheme}://{$dsn->host}";
+    }
+
+    /**
+     * DSN query values are untyped (a query string can produce arrays), so anything
+     * that is not a plain scalar falls back to the given default.
+     */
+    private function queryString(DsnDto $dsn, string $key, string $default): string
+    {
+        $value = $dsn->query[$key] ?? null;
+
+        return \is_string($value) ? $value : $default;
     }
 }

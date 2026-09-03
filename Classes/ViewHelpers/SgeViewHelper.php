@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Lochmueller\SealAi\ViewHelpers;
 
 use Lochmueller\SealAi\AiBridge;
+use Psr\Http\Message\ServerRequestInterface;
 use Symfony\AI\Platform\Message\Message;
 use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Platform\Result\TextResult;
@@ -29,9 +30,15 @@ class SgeViewHelper extends AbstractViewHelper
             return '';
         }
 
-        $request = $this->renderingContext->getRequest();
-        /** @var Site $site */
-        $site = $request->getAttribute('site');
+        if ($this->renderingContext === null || !$this->renderingContext->hasAttribute(ServerRequestInterface::class)) {
+            return '';
+        }
+
+        $site = $this->renderingContext->getAttribute(ServerRequestInterface::class)->getAttribute('site');
+        if (!$site instanceof Site) {
+            return '';
+        }
+
         $config = $site->getConfiguration();
 
         $chatModel = $config['sealAiChatModel'] ?? '';
@@ -61,6 +68,9 @@ class SgeViewHelper extends AbstractViewHelper
         }
     }
 
+    /**
+     * @param array<mixed> $items
+     */
     private function buildContext(array $items): string
     {
         $parts = [];

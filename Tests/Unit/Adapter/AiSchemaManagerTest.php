@@ -16,25 +16,16 @@ use Symfony\AI\Store\StoreInterface;
 
 class AiSchemaManagerTest extends AbstractTest
 {
-    public function testExistIndexReturnsTrue(): void
+    public function testExistIndexAlwaysReturnsTrue(): void
     {
-        $store = new TestManagedStore(existsReturn: true);
+        $store = new TestManagedStore();
         $schemaManager = $this->createSchemaManager($store);
         $index = new Index('dummy', []);
 
         self::assertTrue($schemaManager->existIndex($index));
     }
 
-    public function testExistIndexReturnsFalse(): void
-    {
-        $store = new TestManagedStore(existsReturn: false);
-        $schemaManager = $this->createSchemaManager($store);
-        $index = new Index('dummy', []);
-
-        self::assertFalse($schemaManager->existIndex($index));
-    }
-
-    public function testCreateIndexReturnsSyncTask(): void
+    public function testCreateIndexCallsSetupAndReturnsSyncTask(): void
     {
         $store = new TestManagedStore();
         $schemaManager = $this->createSchemaManager($store);
@@ -43,7 +34,7 @@ class AiSchemaManagerTest extends AbstractTest
         $result = $schemaManager->createIndex($index);
 
         self::assertInstanceOf(SyncTask::class, $result);
-        self::assertTrue($store->createCalled);
+        self::assertTrue($store->setupCalled);
     }
 
     public function testDropIndexReturnsSyncTask(): void
@@ -68,31 +59,18 @@ class AiSchemaManagerTest extends AbstractTest
 }
 
 /**
- * @internal Test double that provides exists() and create() methods
- *           as used by the actual store implementations (e.g. Chroma, Pinecone).
+ * @internal Test double covering the whole StoreInterface and ManagedStoreInterface surface
  */
 class TestManagedStore implements StoreInterface, ManagedStoreInterface
 {
-    public bool $createCalled = false;
+    public bool $setupCalled = false;
     public bool $dropCalled = false;
-
-    public function __construct(
-        private readonly bool $existsReturn = false,
-    ) {}
-
-    public function exists(): bool
-    {
-        return $this->existsReturn;
-    }
-
-    public function create(): void
-    {
-        $this->createCalled = true;
-    }
 
     public function add(VectorDocument|array $documents): void {}
 
     public function remove(string|array $ids, array $options = []): void {}
+
+    public function clear(array $options = []): void {}
 
     public function query(QueryInterface $query, array $options = []): iterable
     {
@@ -104,7 +82,10 @@ class TestManagedStore implements StoreInterface, ManagedStoreInterface
         return false;
     }
 
-    public function setup(array $options = []): void {}
+    public function setup(array $options = []): void
+    {
+        $this->setupCalled = true;
+    }
 
     public function drop(array $options = []): void
     {

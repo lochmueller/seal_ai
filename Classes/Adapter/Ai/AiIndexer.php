@@ -34,7 +34,7 @@ class AiIndexer implements IndexerInterface
             metadata: new Metadata($document),
         )]);
 
-        return new SyncTask(null);
+        return new SyncTask($document);
     }
 
     public function delete(Index $index, string $identifier, array $options = []): ?TaskInterface

@@ -76,6 +76,7 @@ Each platform requires its own composer package. Install only what you need.
 | `generic`      | `symfony/ai-generic-platform`             | `generic://host?api_key=key`                                |
 | `azure-openai` | `symfony/ai-azure-platform`               | `azure-openai://api-key@host?deployment=dep&api_version=ver` |
 | `azure-meta`   | `symfony/ai-azure-platform`               | `azure-meta://api-key@host`                                 |
+| `openresponses`| `symfony/ai-open-responses-platform`      | `openresponses://api-key@host?path=/v1/responses`           |
 
 ## Supported Stores
 
@@ -93,14 +94,19 @@ Each platform requires its own composer package. Install only what you need.
 | `typesense`     | `symfony/ai-typesense-store`        | `typesense://api-key@host:8108?collection=col`                          |
 | `neo4j`         | `symfony/ai-neo4j-store`            | `neo4j://user:pass@host:7474?databaseName=neo4j&vectorIndexName=idx`    |
 | `cloudflare`    | `symfony/ai-cloudflare-store`       | `cloudflare://api-key@default?accountId=acc&index=idx`                  |
-| `pinecone`      | `symfony/ai-pinecone-store`         | `pinecone://api-key@default?indexName=idx`                              |
 | `mongodb`       | `symfony/ai-mongo-db-store`         | `mongodb://host:27017?databaseName=db&collectionName=col&indexName=idx` |
 | `surrealdb`     | `symfony/ai-surreal-db-store`       | `surrealdb://user:pass@host:8000?namespace=ns&database=db`              |
 | `manticore`     | `symfony/ai-manticore-search-store` | `manticore://host:9308?table=tbl`                                       |
 | `clickhouse`    | `symfony/ai-click-house-store`      | `clickhouse://host:8123?databaseName=db&tableName=tbl`                  |
 | `vektor`        | `symfony/ai-vektor-store`           | `vektor://default/path?dimensions=1536`                                 |
+| `s3vectors`     | `symfony/ai-s3vectors-store`        | `s3vectors://region@default?vectorBucketName=bucket&indexName=idx`      |
+| `chroma`        | `symfony/ai-chroma-db-store`        | `chroma://api-key@host:8000?collectionName=col&tenant=t&database=db`    |
+| `cache`         | `symfony/ai-cache-store`            | `cache://default/path?key=my_key&strategy=cosine`                       |
 
 > For `mariadb` and `postgres` stores, the extension reuses the existing TYPO3 database connection automatically.
+
+> The `cache` store keeps all vectors in a filesystem cache pool and is meant for small indexes,
+> local development and testing. It defaults to `var/cache/data/seal-ai`.
 
 ## Extending via Events
 

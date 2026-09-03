@@ -10,8 +10,8 @@ use CmsIg\Seal\Search\Result;
 use CmsIg\Seal\Search\Search;
 use CmsIg\Seal\Search\Condition;
 use Lochmueller\SealAi\AiBridge;
+use Symfony\AI\Platform\Vector\Vector;
 use Symfony\AI\Store\Document\TextDocument;
-use Symfony\AI\Store\Document\VectorDocument;
 use Symfony\AI\Store\Query\VectorQuery;
 
 class AiSearcher implements SearcherInterface
@@ -23,9 +23,7 @@ class AiSearcher implements SearcherInterface
         $searchTerm = $this->recursiveFindSearchTerm($search->filters);
 
         if ($searchTerm === '') {
-            return new Result((function () {
-                yield from [];
-            })(), 0, []);
+            return $this->emptyResult();
         }
 
         $documents = [
@@ -39,22 +37,26 @@ class AiSearcher implements SearcherInterface
 
         $vectorDocuments = $this->aiBridge->getVectorizer()->vectorize($documents);
 
-        $vectorDocument = $vectorDocuments[0];
-        $resultItems = $this->aiBridge->getStore()->query(new VectorQuery($vectorDocument->getVector()), [
+        $vector = $vectorDocuments[0]->getVector();
+        if (!$vector instanceof Vector) {
+            // The platform did not return an embedding for the search term (NullVector).
+            return $this->emptyResult();
+        }
+
+        $resultItems = $this->aiBridge->getStore()->query(new VectorQuery($vector), [
             'limit' => 200,
         ]);
 
-        $start = $search->offset ?? 0;
-        $stop = $search->limit ?? 10;
+        $offset = $search->offset;
+        $limit = $search->limit ?? 10;
 
         $items = [];
         $count = 0;
-        foreach ($resultItems as $i => $item) {
-            $count++;
-            if ($i >= $start && $i < $stop) {
-                /** @var VectorDocument $item */
+        foreach ($resultItems as $item) {
+            if ($count >= $offset && $count < $offset + $limit) {
                 $items[] = array_merge($item->getMetadata()->getArrayCopy(), ['score' => $item->getScore()]);
             }
+            $count++;
         }
 
         return new Result((function () use ($items) {
@@ -62,6 +64,16 @@ class AiSearcher implements SearcherInterface
         })(), $count, []);
     }
 
+    private function emptyResult(): Result
+    {
+        return new Result((function () {
+            yield from [];
+        })(), 0, []);
+    }
+
+    /**
+     * @param object[] $conditions
+     */
     private function recursiveFindSearchTerm(array $conditions): string
     {
         foreach ($conditions as $filter) {
