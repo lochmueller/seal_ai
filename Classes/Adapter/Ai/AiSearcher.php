@@ -93,7 +93,7 @@ class AiSearcher implements SearcherInterface
 
     public function count(Index $index): int
     {
-        // @todo https://github.com/symfony/ai/issues/1750
+        // @todo https://github.com/symfony/ai/issues/1750 - was merged and will be part of release v0.14
         #return count($this->aiBridge->getStore());
 
         // There is no general count of store documents in symfony/ai
