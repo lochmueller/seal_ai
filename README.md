@@ -69,6 +69,7 @@ Each platform requires its own composer package. Install only what you need.
 | `perplexity`   | `symfony/ai-perplexity-platform`          | `perplexity://api-key@default`                              |
 | `scaleway`     | `symfony/ai-scaleway-platform`            | `scaleway://api-key@default`                                |
 | `cerebras`     | `symfony/ai-cerebras-platform`            | `cerebras://api-key@default`                                |
+| `edenai`       | `symfony/ai-eden-ai-platform`             | `edenai://api-key@default?model=openai/text-embedding-3-small` |
 | `decart`       | `symfony/ai-decart-platform`              | `decart://api-key@host`                                     |
 | `aimlapi`      | `symfony/ai-ai-ml-api-platform`           | `aimlapi://api-key@host`                                    |
 | `docker`       | `symfony/ai-docker-model-runner-platform` | `docker://localhost:12434`                                  |

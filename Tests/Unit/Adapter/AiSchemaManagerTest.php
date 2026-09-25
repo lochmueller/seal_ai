@@ -9,7 +9,7 @@ use CmsIg\Seal\Task\SyncTask;
 use Lochmueller\SealAi\Adapter\Ai\AiSchemaManager;
 use Lochmueller\SealAi\AiBridge;
 use Lochmueller\SealAi\Tests\Unit\AbstractTest;
-use Symfony\AI\Store\Document\VectorDocument;
+use Symfony\AI\Store\Document\VectorDocumentInterface;
 use Symfony\AI\Store\ManagedStoreInterface;
 use Symfony\AI\Store\Query\QueryInterface;
 use Symfony\AI\Store\StoreInterface;
@@ -66,11 +66,16 @@ class TestManagedStore implements StoreInterface, ManagedStoreInterface
     public bool $setupCalled = false;
     public bool $dropCalled = false;
 
-    public function add(VectorDocument|array $documents): void {}
+    public function add(VectorDocumentInterface|array $documents): void {}
 
     public function remove(string|array $ids, array $options = []): void {}
 
     public function clear(array $options = []): void {}
+
+    public function count(): int
+    {
+        return 0;
+    }
 
     public function query(QueryInterface $query, array $options = []): iterable
     {

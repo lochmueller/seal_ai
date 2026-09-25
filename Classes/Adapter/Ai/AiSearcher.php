@@ -10,7 +10,7 @@ use CmsIg\Seal\Search\Result;
 use CmsIg\Seal\Search\Search;
 use CmsIg\Seal\Search\Condition;
 use Lochmueller\SealAi\AiBridge;
-use Symfony\AI\Platform\Vector\Vector;
+use Symfony\AI\Platform\Vector\NullVector;
 use Symfony\AI\Store\Document\TextDocument;
 use Symfony\AI\Store\Query\VectorQuery;
 
@@ -38,8 +38,8 @@ class AiSearcher implements SearcherInterface
         $vectorDocuments = $this->aiBridge->getVectorizer()->vectorize($documents);
 
         $vector = $vectorDocuments[0]->getVector();
-        if (!$vector instanceof Vector) {
-            // The platform did not return an embedding for the search term (NullVector).
+        if ($vector instanceof NullVector) {
+            // The platform did not return an embedding for the search term.
             return $this->emptyResult();
         }
 
@@ -93,10 +93,6 @@ class AiSearcher implements SearcherInterface
 
     public function count(Index $index): int
     {
-        // @todo https://github.com/symfony/ai/issues/1750 - was merged and will be part of release v0.14
-        #return count($this->aiBridge->getStore());
-
-        // There is no general count of store documents in symfony/ai
-        return 0;
+        return $this->aiBridge->getStore()->count();
     }
 }

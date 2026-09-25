@@ -24,6 +24,7 @@ use Symfony\AI\Platform\Bridge\Perplexity as PerplexityBridge;
 use Symfony\AI\Platform\Bridge\Scaleway as ScalewayBridge;
 use Symfony\AI\Platform\Bridge\Voyage as VoyageBridge;
 use Symfony\AI\Platform\Bridge\DeepSeek as DeepSeekBridge;
+use Symfony\AI\Platform\Bridge\EdenAi as EdenAiBridge;
 use Symfony\AI\Platform\Bridge\Cerebras as CerebrasBridge;
 use Symfony\AI\Platform\Bridge\Decart as DecartBridge;
 use Symfony\AI\Platform\Bridge\AiMlApi as AiMlApiBridge;
@@ -70,6 +71,7 @@ class PlatformFactory
         // voyage://api-key@default
         // deepseek://api-key@default
         // cerebras://api-key@default
+        // edenai://api-key@default
         // decart://api-key@host
         // aimlapi://api-key@host
         // docker://host:12434
@@ -170,6 +172,11 @@ class PlatformFactory
             case 'cerebras':
                 class_exists(CerebrasBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-cerebras-platform to use Cerebras platform');
                 return CerebrasBridge\Factory::createPlatform($apiKey, $client);
+
+            case 'edenai':
+                class_exists(EdenAiBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-eden-ai-platform to use Eden AI platform');
+                $baseUrl = $this->buildBaseUrl($dsn, 'https', 'https://api.edenai.run');
+                return EdenAiBridge\Factory::createPlatform($apiKey, $client, baseUrl: $baseUrl);
 
             case 'decart':
                 class_exists(DecartBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-decart-platform to use Decart platform');

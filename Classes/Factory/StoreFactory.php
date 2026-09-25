@@ -29,8 +29,6 @@ use Symfony\AI\Store\Bridge\Weaviate as WeaviateBridge;
 use Symfony\AI\Store\ManagedStoreInterface;
 use Symfony\AI\Store\StoreInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\HttpClient\ScopingHttpClient;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -48,8 +46,6 @@ class StoreFactory
 
     public function fromDsn(DsnDto $dsn): StoreInterface&ManagedStoreInterface
     {
-        $client = HttpClient::create();
-
         // DSN Examples:
         // mariadb://default?tableName=my_table
         // postgres://default?tableName=my_table
@@ -105,13 +101,13 @@ class StoreFactory
                 class_exists(ElasticsearchBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-elasticsearch-store to use Elasticsearch store');
                 $endpoint = $this->buildEndpointUrl($dsn, 'http', 9200);
                 $indexName = $this->queryString($dsn, 'indexName', 'default');
-                return new ElasticsearchBridge\Store($client, $endpoint, $indexName);
+                return ElasticsearchBridge\StoreFactory::create($indexName, $endpoint);
 
             case 'opensearch':
                 class_exists(OpenSearchBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-open-search-store to use OpenSearch store');
                 $endpoint = $this->buildEndpointUrl($dsn, 'http', 9200);
                 $indexName = $this->queryString($dsn, 'indexName', 'default');
-                return new OpenSearchBridge\Store($client, $endpoint, $indexName);
+                return OpenSearchBridge\StoreFactory::create($indexName, $endpoint);
 
             case 'meilisearch':
                 class_exists(MeilisearchBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-meilisearch-store to use Meilisearch store');
@@ -122,10 +118,9 @@ class StoreFactory
             case 'milvus':
                 class_exists(MilvusBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-milvus-store to use Milvus store');
                 $endpointUrl = $this->buildEndpointUrl($dsn, 'http', 19530);
-                $apiKey = $dsn->user ?? '';
                 $database = $this->queryString($dsn, 'database', 'default');
                 $collection = $this->queryString($dsn, 'collection', 'default');
-                return new MilvusBridge\Store($client, $endpointUrl, $apiKey, $database, $collection);
+                return MilvusBridge\StoreFactory::create($database, $collection, $endpointUrl, $dsn->user ?: null);
 
             case 'redis':
                 class_exists(RedisBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-redis-store to use Redis store');
@@ -159,7 +154,7 @@ class StoreFactory
                 $databaseName = $this->queryString($dsn, 'databaseName', 'neo4j');
                 $vectorIndexName = $this->queryString($dsn, 'vectorIndexName', 'default');
                 $nodeName = $this->queryString($dsn, 'nodeName', 'Document');
-                return new Neo4jBridge\Store($client, $endpointUrl, $username, $password, $databaseName, $vectorIndexName, $nodeName);
+                return Neo4jBridge\StoreFactory::create($databaseName, $vectorIndexName, $nodeName, $endpointUrl, $username, $password);
 
             case 'cloudflare':
                 class_exists(CloudflareBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-cloudflare-store to use Cloudflare store');
@@ -187,19 +182,18 @@ class StoreFactory
 
             case 'manticore':
                 class_exists(ManticoreSearchBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-manticore-search-store to use ManticoreSearch store');
-                $host = $this->buildEndpointUrl($dsn, 'http', 9308);
+                $endpointUrl = $this->buildEndpointUrl($dsn, 'http', 9308);
                 $table = $this->queryString($dsn, 'table', 'default');
-                return new ManticoreSearchBridge\Store($client, $host, $table);
+                return ManticoreSearchBridge\StoreFactory::create($table, $endpointUrl);
 
             case 'clickhouse':
                 class_exists(ClickHouseBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-click-house-store to use ClickHouse store');
-                // The store issues relative requests against "/", so it needs a client scoped to the endpoint.
-                $endpointUrl = $this->buildEndpointUrl($dsn, 'http', 8123);
-                $defaultOptions = $dsn->user ? ['auth_basic' => [$dsn->user, $dsn->pass ?? '']] : [];
-                $clickHouseClient = ScopingHttpClient::forBaseUri($client, $endpointUrl . '/', $defaultOptions);
+                // The ClickHouse StoreFactory expects credentials as user info inside the endpoint URL.
+                $credentials = $dsn->user ? rawurlencode($dsn->user) . ':' . rawurlencode($dsn->pass ?? '') . '@' : '';
+                $endpointUrl = 'http://' . $credentials . ($dsn->host ?? 'localhost') . ':' . ($dsn->port ?? 8123);
                 $databaseName = $this->queryString($dsn, 'databaseName', 'default');
                 $tableName = $this->queryString($dsn, 'tableName', 'embedding');
-                return new ClickHouseBridge\Store($clickHouseClient, $databaseName, $tableName);
+                return ClickHouseBridge\StoreFactory::create($databaseName, $tableName, $endpointUrl);
 
             case 'vektor':
                 class_exists(VektorBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-vektor-store to use Vektor store');
