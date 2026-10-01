@@ -12,6 +12,9 @@ $EM_CONF[$_EXTKEY] = [
             'seal' => '1.0.0-1.99.99',
             'php' => '8.3.0-8.99.99',
         ],
+        'suggests' => [
+            'aim' => '0.5.0-0.99.99',
+        ],
     ],
     'state' => 'stable',
     'author' => 'Tim Lochmüller',

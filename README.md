@@ -93,6 +93,29 @@ failover://default?platforms[]=openai://sk-key@default&platforms[]=ollama://loca
 > All platforms have to provide the same embedding model (or at least one with identical dimensions),
 > otherwise the stored vectors are not comparable.
 
+### AiM integration (EXT:aim)
+
+If [b13/aim](https://github.com/b13/aim) is installed (`composer require b13/aim`), embeddings and search summaries
+(SGE) can be routed through the AiM proxy instead of a directly configured platform. Requests then go through the AiM
+middleware pipeline (request logging, cost tracking, budgets, fallback) and providers / API keys are managed in the
+AiM backend module.
+
+```
+aim://default
+aim://default?model=openai:text-embedding-3-small&dimensions=768
+```
+
+- `model` — AiM provider notation for the embedding requests (optional, defaults to the AiM default embedding provider)
+- `dimensions` — requested vector dimensions (optional)
+
+With an `aim://` platform DSN, `sealAiChatModel` is an AiM provider notation as well (e.g. `anthropic:claude-sonnet-4`).
+Use `default` to use the AiM default conversation provider. Leave it empty to disable SGE.
+
+AiM does not provide a vector store, so `sealAiStoreDsn` has to be configured as usual.
+
+> Pin a concrete embedding model (`provider:model`). If AiM reroutes embedding requests to another model,
+> the vector dimensions may change and the stored vectors are no longer comparable.
+
 ## Supported Stores
 
 | Scheme          | Package                             | Example DSN                                                             |

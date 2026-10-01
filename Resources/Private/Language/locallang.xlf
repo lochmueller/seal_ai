@@ -8,13 +8,13 @@
                 <source>AI Platform DSN</source>
             </trans-unit>
             <trans-unit id="site.sealAiPlatformDsn.description">
-                <source>Configure the AI platform via DSN. Examples check placeholder.</source>
+                <source>Configure the AI platform via DSN. Examples check placeholder. Use aim://default to route requests through EXT:aim.</source>
             </trans-unit>
             <trans-unit id="site.sealAiChatModel">
                 <source>AI Chat Model</source>
             </trans-unit>
             <trans-unit id="site.sealAiChatModel.description">
-                <source>Model name for AI-generated search summaries (SGE). Leave empty to disable. Example: google/gemini-2.0-flash</source>
+                <source>Model name for AI-generated search summaries (SGE). Leave empty to disable. Example: google/gemini-2.0-flash (with aim:// platform DSN: AiM provider notation like openai:gpt-4o or "default")</source>
             </trans-unit>
             <trans-unit id="site.sealAiStoreDsn">
                 <source>AI Store DSN</source>

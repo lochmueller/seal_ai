@@ -7,8 +7,11 @@ namespace Lochmueller\SealAi\Tests\Unit;
 use Lochmueller\Seal\DsnParser;
 use Lochmueller\Seal\Dto\DsnDto;
 use Lochmueller\SealAi\AiBridge;
+use Lochmueller\SealAi\Chat\ChatInterface;
+use Lochmueller\SealAi\Chat\PlatformChat;
 use Lochmueller\SealAi\Factory\PlatformFactory;
 use Lochmueller\SealAi\Factory\StoreFactory;
+use Lochmueller\SealAi\Integration\Aim\AimFactory;
 use Symfony\AI\Platform\PlatformInterface;
 use Symfony\AI\Store\Document\VectorizerInterface;
 use Symfony\AI\Store\ManagedStoreInterface;
@@ -17,7 +20,7 @@ use TYPO3\CMS\Core\Site\Entity\Site;
 
 class AiBridgeTest extends AbstractTest
 {
-    public function testInitializeSetsStoreAndPlatformAndVectorizer(): void
+    public function testInitializeSetsStoreAndVectorizer(): void
     {
         $store = $this->getStore();
         $platform = $this->createStub(PlatformInterface::class);
@@ -51,8 +54,8 @@ class AiBridgeTest extends AbstractTest
 
         self::assertInstanceOf(StoreInterface::class, $bridge->getStore());
         self::assertInstanceOf(ManagedStoreInterface::class, $bridge->getStore());
-        self::assertInstanceOf(PlatformInterface::class, $bridge->getPlatform());
         self::assertInstanceOf(VectorizerInterface::class, $bridge->getVectorizer());
+        self::assertNull($bridge->getChat());
     }
 
     public function testInitializeThrowsExceptionWhenModelIsMissing(): void
@@ -154,6 +157,86 @@ class AiBridgeTest extends AbstractTest
         $bridge->initialize($site);
 
         self::assertSame($store, $bridge->getStore());
-        self::assertSame($platform, $bridge->getPlatform());
+    }
+
+    public function testInitializeCreatesPlatformChatWhenChatModelIsConfigured(): void
+    {
+        $platformDsn = new DsnDto(scheme: 'openai', user: 'key', query: ['model' => 'my-model']);
+
+        $dsnParser = $this->createStub(DsnParser::class);
+        $dsnParser->method('parse')->willReturn($platformDsn);
+
+        $storeFactory = $this->createStub(StoreFactory::class);
+        $storeFactory->method('fromDsn')->willReturn($this->getStore());
+
+        $platformFactory = $this->createStub(PlatformFactory::class);
+        $platformFactory->method('fromDsn')->willReturn($this->createStub(PlatformInterface::class));
+
+        $site = $this->createStub(Site::class);
+        $site->method('getConfiguration')->willReturn([
+            'sealAiStoreDsn' => 'memory://default',
+            'sealAiPlatformDsn' => 'openai://key@default?model=my-model',
+            'sealAiChatModel' => 'gpt-4o',
+        ]);
+
+        $bridge = new AiBridge($platformFactory, $storeFactory, $dsnParser);
+        $bridge->initialize($site);
+
+        self::assertInstanceOf(PlatformChat::class, $bridge->getChat());
+    }
+
+    public function testInitializeUsesAimFactoryForAimScheme(): void
+    {
+        $aimDsn = new DsnDto(scheme: 'aim', host: 'default', query: ['model' => 'openai:text-embedding-3-small']);
+        $vectorizer = $this->createStub(VectorizerInterface::class);
+        $chat = $this->createStub(ChatInterface::class);
+
+        $dsnParser = $this->createStub(DsnParser::class);
+        $dsnParser->method('parse')->willReturn($aimDsn);
+
+        $storeFactory = $this->createStub(StoreFactory::class);
+        $storeFactory->method('fromDsn')->willReturn($this->getStore());
+
+        $platformFactory = $this->createMock(PlatformFactory::class);
+        $platformFactory->expects(self::never())->method('fromDsn');
+
+        $aimFactory = $this->createMock(AimFactory::class);
+        $aimFactory->expects(self::once())->method('createVectorizer')->with($aimDsn)->willReturn($vectorizer);
+        $aimFactory->expects(self::once())->method('createChat')->with('default')->willReturn($chat);
+
+        $site = $this->createStub(Site::class);
+        $site->method('getConfiguration')->willReturn([
+            'sealAiStoreDsn' => 'memory://default',
+            'sealAiPlatformDsn' => 'aim://default?model=openai:text-embedding-3-small',
+            'sealAiChatModel' => 'default',
+        ]);
+
+        $bridge = new AiBridge($platformFactory, $storeFactory, $dsnParser, $aimFactory);
+        $bridge->initialize($site);
+
+        self::assertSame($vectorizer, $bridge->getVectorizer());
+        self::assertSame($chat, $bridge->getChat());
+    }
+
+    public function testInitializeThrowsExceptionForAimSchemeWithoutAim(): void
+    {
+        $dsnParser = $this->createStub(DsnParser::class);
+        $dsnParser->method('parse')->willReturn(new DsnDto(scheme: 'aim', host: 'default'));
+
+        $storeFactory = $this->createStub(StoreFactory::class);
+        $storeFactory->method('fromDsn')->willReturn($this->getStore());
+
+        $site = $this->createStub(Site::class);
+        $site->method('getConfiguration')->willReturn([
+            'sealAiStoreDsn' => 'memory://default',
+            'sealAiPlatformDsn' => 'aim://default',
+        ]);
+
+        $bridge = new AiBridge($this->createStub(PlatformFactory::class), $storeFactory, $dsnParser);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionCode(1759312002);
+
+        $bridge->initialize($site);
     }
 }

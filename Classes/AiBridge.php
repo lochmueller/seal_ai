@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Lochmueller\SealAi;
 
 use Lochmueller\Seal\DsnParser;
+use Lochmueller\Seal\Dto\DsnDto;
+use Lochmueller\SealAi\Chat\ChatInterface;
+use Lochmueller\SealAi\Chat\PlatformChat;
 use Lochmueller\SealAi\Factory\PlatformFactory;
 use Lochmueller\SealAi\Factory\StoreFactory;
-use Symfony\AI\Platform\PlatformInterface;
+use Lochmueller\SealAi\Integration\Aim\AimFactory;
 use Symfony\AI\Store\Document\Vectorizer;
 use Symfony\AI\Store\Document\VectorizerInterface;
 use Symfony\AI\Store\ManagedStoreInterface;
@@ -18,7 +21,7 @@ class AiBridge
 {
     protected VectorizerInterface $vectorizer;
 
-    protected PlatformInterface $platform;
+    protected ?ChatInterface $chat = null;
 
     protected StoreInterface&ManagedStoreInterface $store;
 
@@ -26,6 +29,7 @@ class AiBridge
         private readonly PlatformFactory $platformFactory,
         private readonly StoreFactory    $storeFactory,
         private readonly DsnParser       $dsnParser,
+        private readonly ?AimFactory     $aimFactory = null,
     ) {}
 
     public function getStore(): StoreInterface&ManagedStoreInterface
@@ -38,9 +42,12 @@ class AiBridge
         return $this->vectorizer;
     }
 
-    public function getPlatform(): PlatformInterface
+    /**
+     * Chat for AI-generated search summaries (SGE). Null if no "sealAiChatModel" is configured.
+     */
+    public function getChat(): ?ChatInterface
     {
-        return $this->platform;
+        return $this->chat;
     }
 
     public function initialize(Site $site): void
@@ -63,13 +70,21 @@ class AiBridge
             );
         }
 
+        $chatModel = $config['sealAiChatModel'] ?? '';
+        $chatModel = \is_string($chatModel) ? $chatModel : '';
+
         // Store
         $dsnDto = $this->dsnParser->parse($storeDsn);
         $this->store = $this->storeFactory->fromDsn($dsnDto);
 
         // Platform
         $dsnDto = $this->dsnParser->parse($platformDsn);
-        $this->platform = $this->platformFactory->fromDsn($dsnDto);
+        if ($dsnDto->scheme === 'aim') {
+            $this->initializeAim($dsnDto, $chatModel);
+            return;
+        }
+
+        $platform = $this->platformFactory->fromDsn($dsnDto);
 
         $model = $dsnDto->query['model'] ?? '';
         if (!\is_string($model) || $model === '') {
@@ -78,7 +93,20 @@ class AiBridge
                 1739091202
             );
         }
-        $this->vectorizer = new Vectorizer($this->platform, $model);
+        $this->vectorizer = new Vectorizer($platform, $model);
+        $this->chat = $chatModel !== '' ? new PlatformChat($platform, $chatModel) : null;
     }
 
+    protected function initializeAim(DsnDto $dsnDto, string $chatModel): void
+    {
+        if ($this->aimFactory === null) {
+            throw new \RuntimeException(
+                'Please install b13/aim (EXT:aim) to use the "aim://" platform DSN',
+                1759312002
+            );
+        }
+
+        $this->vectorizer = $this->aimFactory->createVectorizer($dsnDto);
+        $this->chat = $chatModel !== '' ? $this->aimFactory->createChat($chatModel) : null;
+    }
 }

@@ -20,6 +20,7 @@
     "typo3/cms-core": "^13.4 || ^14.3"
   },
   "require-dev": {
+    "b13/aim": "^0.5",
     "friendsofphp/php-cs-fixer": "^3.84",
     "phpstan/phpstan": "^2.1",
     "symfony/ai-ai-ml-api-platform": "^0.14",
@@ -84,6 +85,9 @@
     "symfony/ai-voyage-platform": "^0.14",
     "symfony/ai-weaviate-store": "^0.14",
     "typo3/testing-framework": "^8.0 || ^9.3"
+  },
+  "suggest": {
+    "b13/aim": "Use AiM (EXT:aim) for embeddings and search summaries via the aim:// platform DSN (logging, budgets, provider management)"
   },
   "autoload": {
     "psr-4": {

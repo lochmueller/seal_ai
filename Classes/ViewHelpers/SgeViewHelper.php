@@ -6,9 +6,6 @@ namespace Lochmueller\SealAi\ViewHelpers;
 
 use Lochmueller\SealAi\AiBridge;
 use Psr\Http\Message\ServerRequestInterface;
-use Symfony\AI\Platform\Message\Message;
-use Symfony\AI\Platform\Message\MessageBag;
-use Symfony\AI\Platform\Result\TextResult;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 
@@ -39,30 +36,26 @@ class SgeViewHelper extends AbstractViewHelper
             return '';
         }
 
-        $config = $site->getConfiguration();
-
-        $chatModel = $config['sealAiChatModel'] ?? '';
-        if ($chatModel === '') {
+        if (($site->getConfiguration()['sealAiChatModel'] ?? '') === '') {
             return '';
         }
 
         $this->aiBridge->initialize($site);
+        $chat = $this->aiBridge->getChat();
+        if ($chat === null) {
+            return '';
+        }
 
-        $messages = new MessageBag(
-            Message::forSystem(
+        try {
+            $summary = $chat->complete(
                 'You are a helpful search assistant. Summarize the following search results into a concise, '
                 . 'informative overview. Highlight the most relevant information. '
                 . 'Respond in the same language as the content. Use HTML for formatting (paragraphs, lists). '
-                . 'Do not wrap the response in a code block.'
-            ),
-            Message::ofUser($this->buildContext($items)),
-        );
+                . 'Do not wrap the response in a code block.',
+                $this->buildContext($items),
+            );
 
-        try {
-            /** @var TextResult $result */
-            $result = $this->aiBridge->getPlatform()->invoke($chatModel, $messages)->getResult();
-
-            return '<div class="seal-ai-sge">' . $result->getContent() . '</div>';
+            return '<div class="seal-ai-sge">' . $summary . '</div>';
         } catch (\Throwable) {
             return '';
         }
