@@ -78,6 +78,20 @@ Each platform requires its own composer package. Install only what you need.
 | `azure-openai` | `symfony/ai-azure-platform`               | `azure-openai://api-key@host?deployment=dep&api_version=ver` |
 | `azure-meta`   | `symfony/ai-azure-platform`               | `azure-meta://api-key@host`                                 |
 | `openresponses`| `symfony/ai-open-responses-platform`      | `openresponses://api-key@host?path=/v1/responses`           |
+| `failover`     | `symfony/ai-failover-platform`            | `failover://default?platforms[]=...&platforms[]=...&model=...` |
+
+### Failover platform
+
+The `failover` scheme wraps several platforms, which are tried in the given order until one succeeds.
+Each fallback is a nested platform DSN in the `platforms[]` query parameter. URL-encode nested DSNs that
+contain their own `?` / `&`. The `model` parameter belongs to the outer DSN and is used for all platforms.
+
+```
+failover://default?platforms[]=openai://sk-key@default&platforms[]=ollama://localhost:11434&model=text-embedding-3-small
+```
+
+> All platforms have to provide the same embedding model (or at least one with identical dimensions),
+> otherwise the stored vectors are not comparable.
 
 ## Supported Stores
 

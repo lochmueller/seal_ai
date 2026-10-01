@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lochmueller\SealAi\Factory;
 
+use Lochmueller\Seal\DsnParser;
 use Lochmueller\Seal\Dto\DsnDto;
 use Symfony\AI\Platform\PlatformInterface;
 use Symfony\AI\Platform\Bridge\OpenResponses as OpenResponsesBridge;
@@ -33,7 +34,10 @@ use Symfony\AI\Platform\Bridge\TransformersPhp as TransformersPhpBridge;
 use Symfony\AI\Platform\Bridge\Generic as GenericBridge;
 use Symfony\AI\Platform\Bridge\Azure as AzureBridge;
 use Symfony\AI\Platform\Bridge\Bedrock as BedrockBridge;
+use Symfony\AI\Platform\Bridge\Failover as FailoverBridge;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\Storage\InMemoryStorage;
 use Lochmueller\SealAi\Event\CreatePlatformEvent;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
@@ -44,6 +48,7 @@ class PlatformFactory
 {
     public function __construct(
         private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly DsnParser $dsnParser,
     ) {}
 
     public function fromDsn(DsnDto $dsn): PlatformInterface
@@ -80,12 +85,20 @@ class PlatformFactory
         // openresponses://api-key@host?path=/v1/responses
         // azure-openai://api-key@host?deployment=deployment&api_version=api-version
         // azure-meta://api-key@host
+        // failover://default?platforms[]=openai://api-key@default&platforms[]=ollama://host:11434
 
         switch ($dsn->scheme) {
             case 'event':
                 $event = new CreatePlatformEvent($dsn);
                 $this->eventDispatcher->dispatch($event);
                 return $event->getPlatform() ?? throw new \RuntimeException('No platform provided by event listener for DSN scheme "event"', 1739091200);
+
+            case 'failover':
+                class_exists(FailoverBridge\FailoverPlatformFactory::class) or throw new \RuntimeException('Please install symfony/ai-failover-platform to use Failover platform');
+                return FailoverBridge\FailoverPlatformFactory::create(
+                    $this->createFailoverPlatforms($dsn),
+                    new RateLimiterFactory(['id' => 'seal_ai_failover', 'policy' => 'no_limit'], new InMemoryStorage()),
+                );
 
             case 'openai':
                 class_exists(OpenAiBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-open-ai-platform to use OpenAI platform');
@@ -224,6 +237,34 @@ class PlatformFactory
             default:
                 throw new \InvalidArgumentException("Unsupported DSN scheme: {$dsn->scheme}");
         }
+    }
+
+    /**
+     * The fallback platforms are nested DSNs in the "platforms" query array and are
+     * tried in the given order. Nested DSNs with own query parameters must be URL encoded.
+     *
+     * @return list<PlatformInterface>
+     */
+    private function createFailoverPlatforms(DsnDto $dsn): array
+    {
+        $platformDsns = $dsn->query['platforms'] ?? [];
+        if (!\is_array($platformDsns)) {
+            $platformDsns = [$platformDsns];
+        }
+
+        $platforms = [];
+        foreach ($platformDsns as $platformDsn) {
+            if (!\is_string($platformDsn) || $platformDsn === '') {
+                continue;
+            }
+            $platforms[] = $this->fromDsn($this->dsnParser->parse($platformDsn));
+        }
+
+        if ($platforms === []) {
+            throw new \InvalidArgumentException('The "failover" DSN needs at least one platform DSN in the "platforms[]" query parameter', 1759312800);
+        }
+
+        return $platforms;
     }
 
     private function buildBaseUrl(DsnDto $dsn, string $scheme, string $default = ''): string
