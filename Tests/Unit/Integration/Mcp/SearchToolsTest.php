@@ -17,9 +17,8 @@ use Lochmueller\SealAi\Integration\Mcp\SearchTools;
 use Lochmueller\SealAi\Tests\Unit\AbstractTest;
 use Mcp\Exception\ToolCallException;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use TYPO3\CMS\Core\Cache\Backend\TransientMemoryBackend;
 use TYPO3\CMS\Core\Cache\CacheManager;
-use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
+use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Site\Entity\Site;
 
 class SearchToolsTest extends AbstractTest
@@ -139,7 +138,15 @@ class SearchToolsTest extends AbstractTest
         $seal->method('buildEngineBySite')->willReturn($engine);
         $seal->method('getIndexNameBySite')->willReturn(SchemaBuilder::DEFAULT_INDEX);
 
-        $cache = new VariableFrontend(SearchTools::CACHE_IDENTIFIER, new TransientMemoryBackend());
+        // In-memory cache stub: the TransientMemoryBackend constructor differs between TYPO3 v13 and v14
+        $entries = [];
+        $cache = $this->createStub(FrontendInterface::class);
+        $cache->method('set')->willReturnCallback(function (string $entryIdentifier, mixed $data) use (&$entries): void {
+            $entries[$entryIdentifier] = $data;
+        });
+        $cache->method('get')->willReturnCallback(function (string $entryIdentifier) use (&$entries): mixed {
+            return $entries[$entryIdentifier] ?? false;
+        });
         $cacheManager = $this->createStub(CacheManager::class);
         $cacheManager->method('getCache')->willReturn($cache);
 
