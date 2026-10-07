@@ -37,8 +37,30 @@ $GLOBALS['SiteConfiguration']['site']['columns']['sealAiStoreDsn'] = [
     ],
 ];
 
+$GLOBALS['SiteConfiguration']['site']['columns']['sealAiMcpToken'] = [
+    'label' => $lll . 'site.sealAiMcpToken',
+    'description' => $lll . 'site.sealAiMcpToken.description',
+    'config' => [
+        'type' => 'password',
+        'hashed' => false,
+        'default' => '',
+        'fieldControl' => [
+            'passwordGenerator' => [
+                'renderType' => 'passwordGenerator',
+                'options' => [
+                    'title' => 'Generate MCP token',
+                    'passwordRules' => [
+                        'length' => 40,
+                        'random' => 'base64',
+                    ],
+                ],
+            ],
+        ],
+    ],
+];
+
 $GLOBALS['SiteConfiguration']['site']['types']['0']['showitem'] = str_replace(
     ', sealSearchDsn,',
-    ', sealSearchDsn, sealAiPlatformDsn, sealAiChatModel, sealAiStoreDsn, ',
+    ', sealSearchDsn, sealAiPlatformDsn, sealAiChatModel, sealAiStoreDsn, sealAiMcpToken, ',
     $GLOBALS['SiteConfiguration']['site']['types']['0']['showitem'],
 );

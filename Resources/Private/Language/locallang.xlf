@@ -22,6 +22,12 @@
             <trans-unit id="site.sealAiStoreDsn.description">
                 <source>Configure the AI store via DSN. Examples check placeholder.</source>
             </trans-unit>
+            <trans-unit id="site.sealAiMcpToken">
+                <source>MCP Server Token</source>
+            </trans-unit>
+            <trans-unit id="site.sealAiMcpToken.description">
+                <source>Bearer token for the read-only MCP server at "[site base]/seal/mcp" (requires mcp/sdk). Leave empty to disable the MCP server.</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

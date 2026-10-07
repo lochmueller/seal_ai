@@ -116,6 +116,36 @@ AiM does not provide a vector store, so `sealAiStoreDsn` has to be configured as
 > Pin a concrete embedding model (`provider:model`). If AiM reroutes embedding requests to another model,
 > the vector dimensions may change and the stored vectors are no longer comparable.
 
+### MCP server (mcp/sdk)
+
+If [mcp/sdk](https://github.com/modelcontextprotocol/php-sdk) is installed (`composer require mcp/sdk`), every site can
+provide a read-only [MCP](https://modelcontextprotocol.io) server, so AI agents (Claude, ChatGPT, Cursor, ...) can
+use the website search. The server uses the SEAL engine of the site, so it works with every SEAL adapter (not only `ai://`).
+
+1. Set a token in the site configuration (**MCP Server Token**, `sealAiMcpToken`). Without a token the server is disabled.
+   Use `%env(SEAL_AI_MCP_TOKEN)%` to keep the token out of the `config.yaml`.
+2. Connect the client to `<site/language base>/seal/mcp` (Streamable HTTP) with the header `Authorization: Bearer <token>`.
+
+```json
+{
+  "mcpServers": {
+    "my-website": {
+      "type": "http",
+      "url": "https://www.example.com/seal/mcp",
+      "headers": { "Authorization": "Bearer YOUR_TOKEN" }
+    }
+  }
+}
+```
+
+Tools (all read-only, bound to the site and language of the requested URL):
+
+- `search` — `query`, optional `limit` (max. 50) and `offset`. Returns ID, title, URI, a short snippet and the score.
+- `retrieve` — `id` from a search result. Returns the full document (title, URI, content, tags, ...).
+
+> Vector stores provide no lookup by ID. Therefore documents of search results are cached for 24h
+> (cache `seal_ai_mcp`) and `retrieve` works for documents that were returned by a previous `search`.
+
 ## Supported Stores
 
 | Scheme          | Package                             | Example DSN                                                             |

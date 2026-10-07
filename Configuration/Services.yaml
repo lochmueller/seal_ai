@@ -6,5 +6,7 @@ services:
 
   Lochmueller\SealAi\:
     resource: '../Classes/*'
-    # Registered in Services.php, only if EXT:aim is installed
-    exclude: '../Classes/Integration/Aim/*'
+    # Registered in Services.php, only if the optional packages are installed
+    exclude:
+      - '../Classes/Integration/Aim/*'
+      - '../Classes/Integration/Mcp/*'

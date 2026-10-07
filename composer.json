@@ -84,10 +84,12 @@
     "symfony/ai-vertex-ai-platform": "^0.14",
     "symfony/ai-voyage-platform": "^0.14",
     "symfony/ai-weaviate-store": "^0.14",
-    "typo3/testing-framework": "^8.0 || ^9.3"
+    "typo3/testing-framework": "^8.0 || ^9.3",
+    "mcp/sdk": "^0.8"
   },
   "suggest": {
-    "b13/aim": "Use AiM (EXT:aim) for embeddings and search summaries via the aim:// platform DSN (logging, budgets, provider management)"
+    "b13/aim": "Use AiM (EXT:aim) for embeddings and search summaries via the aim:// platform DSN (logging, budgets, provider management)",
+    "mcp/sdk": "Provide a read-only MCP server (search & retrieve tools with token authentication) for each site at <site base>/seal/mcp"
   },
   "autoload": {
     "psr-4": {
