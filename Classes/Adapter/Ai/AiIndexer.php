@@ -11,6 +11,8 @@ use CmsIg\Seal\Task\TaskInterface;
 use Lochmueller\SealAi\AiBridge;
 use Symfony\AI\Store\Document\Metadata;
 use Symfony\AI\Store\Document\TextDocument;
+use Symfony\AI\Store\Document\Transformer\TextSplitTransformer;
+use Symfony\AI\Store\Document\Transformer\TextTrimTransformer;
 use Symfony\AI\Store\Indexer\DocumentIndexer;
 use Symfony\AI\Store\Indexer\DocumentProcessor;
 
@@ -22,9 +24,15 @@ class AiIndexer implements IndexerInterface
     {
         $this->delete($index, $document['id']);
 
+        $transformers = [
+            new TextTrimTransformer(),
+        ];
+        // @todo // TextSplitTransformer::class for Chunk Size reduction
+
         $processor = new DocumentProcessor(
             $this->aiBridge->getVectorizer(),
-            $this->aiBridge->getStore()
+            $this->aiBridge->getStore(),
+            transformers: $transformers
         );
 
         $aiIndexer = new DocumentIndexer($processor);
