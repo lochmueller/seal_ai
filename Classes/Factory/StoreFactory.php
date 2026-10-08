@@ -6,6 +6,7 @@ namespace Lochmueller\SealAi\Factory;
 
 use Codewithkyrian\ChromaDB\ChromaDB;
 use Lochmueller\Seal\Dto\DsnDto;
+use Symfony\AI\Store\Bridge\AzureSearch as AzureSearchBridge;
 use Symfony\AI\Store\Bridge\Cache as CacheBridge;
 use Symfony\AI\Store\Bridge\ChromaDb as ChromaDbBridge;
 use Symfony\AI\Store\Bridge\ClickHouse as ClickHouseBridge;
@@ -22,6 +23,8 @@ use Symfony\AI\Store\Bridge\Postgres as PostgresBridge;
 use Symfony\AI\Store\Bridge\Qdrant as QdrantBridge;
 use Symfony\AI\Store\Bridge\Redis as RedisBridge;
 use Symfony\AI\Store\Bridge\S3Vectors as S3VectorsBridge;
+use Symfony\AI\Store\Bridge\Sqlite as SqliteBridge;
+use Symfony\AI\Store\Bridge\Supabase as SupabaseBridge;
 use Symfony\AI\Store\Bridge\SurrealDb as SurrealDbBridge;
 use Symfony\AI\Store\Bridge\Typesense as TypesenseBridge;
 use Symfony\AI\Store\Bridge\Vektor as VektorBridge;
@@ -33,6 +36,7 @@ use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Lochmueller\SealAi\Event\CreateStoreEvent;
+use Lochmueller\SealAi\Store\UnmanagedStoreDecorator;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -67,6 +71,10 @@ class StoreFactory
         // s3vectors://region@default?vectorBucketName=my_bucket&indexName=my_index
         // chroma://api-key@host:8000?collectionName=my_collection&tenant=my_tenant&database=my_db
         // cache://default/path/to/cache?key=my_key&strategy=cosine
+        // sqlite://default/var/seal-ai.sqlite?tableName=my_table
+        // sqlite://default/var/seal-ai.sqlite?tableName=my_table&vec=1&dimensions=1536&distance=cosine
+        // azure-search://api-key@my-service.search.windows.net?indexName=my_index&vectorField=vector&apiVersion=2024-07-01
+        // supabase://api-key@my-project.supabase.co?table=documents&vectorFieldName=embedding&dimensions=1536&functionName=match_documents
 
         switch ($dsn->scheme) {
             case 'event':
@@ -229,6 +237,37 @@ class StoreFactory
                 $cacheKey = $this->queryString($dsn, 'key', '_vectors');
                 $strategy = $this->queryString($dsn, 'strategy', 'cosine');
                 return CacheBridge\StoreFactory::create(new FilesystemAdapter('', 0, $cachePath), $cacheKey, $strategy);
+
+            case 'sqlite':
+                class_exists(SqliteBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-sqlite-store to use SQLite store');
+                // The DSN path is relative to the project root, so web and CLI requests use the same database file.
+                $databasePath = Environment::getProjectPath() . '/' . ($dsn->path ?? 'var/seal-ai.sqlite');
+                $tableName = $this->queryString($dsn, 'tableName', 'tx_sealai_data');
+                if ($this->queryString($dsn, 'vec', '0') === '1') {
+                    // Requires the sqlite-vec extension to be loaded into PDO.
+                    $distance = SqliteBridge\Distance::tryFrom($this->queryString($dsn, 'distance', 'cosine')) ?? SqliteBridge\Distance::Cosine;
+                    $dimensions = $this->queryInt($dsn, 'dimensions', 1536);
+                    return SqliteBridge\StoreFactory::createVecStore('sqlite:' . $databasePath, $tableName, $distance, $dimensions);
+                }
+                return SqliteBridge\StoreFactory::create('sqlite:' . $databasePath, $tableName);
+
+            case 'azure-search':
+            case 'azuresearch':
+                class_exists(AzureSearchBridge\SearchStore::class) or throw new \RuntimeException('Please install symfony/ai-azure-search-store to use Azure AI Search store');
+                $endpoint = 'https://' . ($dsn->host ?? throw new \InvalidArgumentException('Azure AI Search store DSN requires a host', 1791446401));
+                $indexName = $this->queryString($dsn, 'indexName', 'default');
+                $vectorField = $this->queryString($dsn, 'vectorField', 'vector');
+                $apiVersion = $this->queryString($dsn, 'apiVersion', '2024-07-01');
+                return new UnmanagedStoreDecorator(AzureSearchBridge\StoreFactory::create($indexName, $vectorField, $endpoint, $dsn->user ?: null, $apiVersion));
+
+            case 'supabase':
+                class_exists(SupabaseBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-supabase-store to use Supabase store');
+                $endpoint = 'https://' . ($dsn->host ?? throw new \InvalidArgumentException('Supabase store DSN requires a host', 1791446402));
+                $table = $this->queryString($dsn, 'table', 'documents');
+                $vectorFieldName = $this->queryString($dsn, 'vectorFieldName', 'embedding');
+                $dimensions = $this->queryInt($dsn, 'dimensions', 1536);
+                $functionName = $this->queryString($dsn, 'functionName', 'match_documents');
+                return new UnmanagedStoreDecorator(SupabaseBridge\StoreFactory::create($endpoint, $dsn->user ?: null, null, $table, $vectorFieldName, $dimensions, $functionName));
 
             default:
                 throw new \InvalidArgumentException("Unsupported store DSN scheme: {$dsn->scheme}");

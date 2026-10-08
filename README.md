@@ -63,6 +63,7 @@ Each platform requires its own composer package. Install only what you need.
 | `lmstudio`     | `symfony/ai-lm-studio-platform`           | `lmstudio://localhost:1234`                                 |
 | `deepseek`     | `symfony/ai-deep-seek-platform`           | `deepseek://api-key@default`                                |
 | `voyage`       | `symfony/ai-voyage-platform`              | `voyage://api-key@default`                                  |
+| `cohere`       | `symfony/ai-cohere-platform`              | `cohere://api-key@default`                                  |
 | `albert`       | `symfony/ai-albert-platform`              | `albert://api-key@host`                                     |
 | `cartesia`     | `symfony/ai-cartesia-platform`            | `cartesia://api-key@default?version=v1`                     |
 | `elevenlabs`   | `symfony/ai-eleven-labs-platform`         | `elevenlabs://api-key@host`                                 |
@@ -170,11 +171,23 @@ Tools (all read-only, bound to the site and language of the requested URL):
 | `s3vectors`     | `symfony/ai-s3vectors-store`        | `s3vectors://region@default?vectorBucketName=bucket&indexName=idx`      |
 | `chroma`        | `symfony/ai-chroma-db-store`        | `chroma://api-key@host:8000?collectionName=col&tenant=t&database=db`    |
 | `cache`         | `symfony/ai-cache-store`            | `cache://default/path?key=my_key&strategy=cosine`                       |
+| `sqlite`        | `symfony/ai-sqlite-store`           | `sqlite://default/var/seal-ai.sqlite?tableName=tbl`                     |
+| `azure-search`  | `symfony/ai-azure-search-store`     | `azure-search://api-key@service.search.windows.net?indexName=idx`       |
+| `supabase`      | `symfony/ai-supabase-store`         | `supabase://api-key@project.supabase.co?table=documents`                |
 
 > For `mariadb` and `postgres` stores, the extension reuses the existing TYPO3 database connection automatically.
 
 > The `cache` store keeps all vectors in a filesystem cache pool and is meant for small indexes,
 > local development and testing. It defaults to `var/cache/data/seal-ai`.
+
+> The `sqlite` store needs no additional service. The path is relative to the project root and defaults to
+> `var/seal-ai.sqlite`. By default the similarity is calculated in PHP. With `vec=1` (and `dimensions`, `distance`)
+> the [sqlite-vec](https://github.com/asg017/sqlite-vec) extension is used, which has to be loaded into PDO.
+
+> The `azure-search` and `supabase` stores can not create their schema. Create the index (Azure AI Search) or the table
+> and match function (Supabase, see the `symfony/ai-supabase-store` documentation) before indexing. Dropping the index
+> in SEAL only removes the documents. Further options: `vectorField` and `apiVersion` (Azure AI Search),
+> `vectorFieldName`, `dimensions` and `functionName` (Supabase).
 
 ## Extending via Events
 

@@ -11,6 +11,7 @@ use Lochmueller\SealAi\Factory\PlatformFactory;
 use Lochmueller\SealAi\Tests\Unit\AbstractTest;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\AI\Platform\Bridge\Failover\FailoverPlatform;
+use Symfony\AI\Platform\Platform;
 use Symfony\AI\Platform\PlatformInterface;
 
 class PlatformFactoryTest extends AbstractTest
@@ -93,6 +94,15 @@ class PlatformFactoryTest extends AbstractTest
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Unsupported DSN scheme: unsupported-scheme');
         $factory->fromDsn($dsn);
+    }
+
+    public function testCohereSchemeCreatesPlatform(): void
+    {
+        $dsn = $this->createDsnParser()->parse('cohere://api-key@default');
+
+        $factory = new PlatformFactory($this->createStub(EventDispatcherInterface::class), $this->createDsnParser());
+
+        self::assertInstanceOf(Platform::class, $factory->fromDsn($dsn));
     }
 
     private function createDsnParser(): DsnParser

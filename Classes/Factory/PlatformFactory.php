@@ -24,6 +24,7 @@ use Symfony\AI\Platform\Bridge\ElevenLabs as ElevenLabsBridge;
 use Symfony\AI\Platform\Bridge\Perplexity as PerplexityBridge;
 use Symfony\AI\Platform\Bridge\Scaleway as ScalewayBridge;
 use Symfony\AI\Platform\Bridge\Voyage as VoyageBridge;
+use Symfony\AI\Platform\Bridge\Cohere as CohereBridge;
 use Symfony\AI\Platform\Bridge\DeepSeek as DeepSeekBridge;
 use Symfony\AI\Platform\Bridge\EdenAi as EdenAiBridge;
 use Symfony\AI\Platform\Bridge\Cerebras as CerebrasBridge;
@@ -74,6 +75,7 @@ class PlatformFactory
         // perplexity://api-key@default
         // scaleway://api-key@default
         // voyage://api-key@default
+        // cohere://api-key@default
         // deepseek://api-key@default
         // cerebras://api-key@default
         // edenai://api-key@default
@@ -177,6 +179,10 @@ class PlatformFactory
             case 'voyage':
                 class_exists(VoyageBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-voyage-platform to use Voyage platform');
                 return VoyageBridge\Factory::createPlatform($apiKey, $client);
+
+            case 'cohere':
+                class_exists(CohereBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-cohere-platform to use Cohere platform');
+                return CohereBridge\Factory::createPlatform($apiKey, $client);
 
             case 'deepseek':
                 class_exists(DeepSeekBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-deep-seek-platform to use DeepSeek platform');
