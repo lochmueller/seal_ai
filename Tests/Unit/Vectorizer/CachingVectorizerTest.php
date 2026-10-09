@@ -17,6 +17,7 @@ use Symfony\AI\Store\Document\VectorizerInterface;
 use TYPO3\CMS\Core\Cache\Backend\TransientMemoryBackend;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
+use TYPO3\CMS\Core\Information\Typo3Version;
 
 class CachingVectorizerTest extends AbstractTest
 {
@@ -69,7 +70,7 @@ class CachingVectorizerTest extends AbstractTest
 
     public function testDifferentFingerprintDoesNotShareCacheEntry(): void
     {
-        $cache = new VariableFrontend(CachingVectorizer::CACHE_IDENTIFIER, new TransientMemoryBackend());
+        $cache = new VariableFrontend(CachingVectorizer::CACHE_IDENTIFIER, $this->createMemoryBackend());
         $inner = $this->createCountingVectorizer();
 
         (new CachingVectorizer($inner, $cache, CachingVectorizer::createFingerprint('openai', 'model-a', 0)))->vectorize('Text');
@@ -124,9 +125,19 @@ class CachingVectorizerTest extends AbstractTest
     {
         return new CachingVectorizer(
             $inner,
-            new VariableFrontend(CachingVectorizer::CACHE_IDENTIFIER, new TransientMemoryBackend()),
+            new VariableFrontend(CachingVectorizer::CACHE_IDENTIFIER, $this->createMemoryBackend()),
             CachingVectorizer::createFingerprint('openai', 'text-embedding-3-small', 0),
         );
+    }
+
+    private function createMemoryBackend(): TransientMemoryBackend
+    {
+        // TYPO3 v13 still requires the application context as first constructor argument
+        if ((new Typo3Version())->getMajorVersion() < 14) {
+            return new TransientMemoryBackend('Testing');
+        }
+
+        return new TransientMemoryBackend();
     }
 
     /**
