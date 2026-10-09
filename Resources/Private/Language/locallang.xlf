@@ -22,6 +22,12 @@
             <trans-unit id="site.sealAiStoreDsn.description">
                 <source>Configure the AI store via DSN. Examples check placeholder.</source>
             </trans-unit>
+            <trans-unit id="site.sealAiEmbeddingCache">
+                <source>AI Embedding Cache</source>
+            </trans-unit>
+            <trans-unit id="site.sealAiEmbeddingCache.description">
+                <source>Cache embeddings of indexed content (cache "seal_ai_embedding"). Unchanged content is not sent to the AI platform again during re-indexing.</source>
+            </trans-unit>
             <trans-unit id="site.sealAiMcpToken">
                 <source>MCP Server Token</source>
             </trans-unit>

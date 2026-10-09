@@ -117,6 +117,22 @@ AiM does not provide a vector store, so `sealAiStoreDsn` has to be configured as
 > Pin a concrete embedding model (`provider:model`). If AiM reroutes embedding requests to another model,
 > the vector dimensions may change and the stored vectors are no longer comparable.
 
+### Embedding cache
+
+Embeddings of indexed content are cached in the TYPO3 caching framework (cache `seal_ai_embedding`). The cache key is a
+SHA-256 hash of the normalized text (Unicode NFC, collapsed whitespace, without control / zero-width characters) plus
+the platform scheme, `model` and `dimensions`. Unchanged content is not sent to the AI platform again, so a full
+re-index only costs tokens for new or changed documents. Search queries are not cached.
+
+- Enabled by default, can be disabled per site (**AI Embedding Cache**, `sealAiEmbeddingCache`).
+- Database backend with 30 days lifetime by default. Run "Analyze Database Structure" once to create the cache tables.
+  Backend and lifetime can be changed via `$GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['seal_ai_embedding']`.
+- The cache is in its own group `seal_ai`, so "Flush frontend caches" keeps the embeddings.
+  Flush it with `vendor/bin/typo3 cache:flush --group seal_ai`. Expired entries are removed by the scheduler task
+  "Caching framework garbage collection".
+- A changed model or dimension results in new cache keys automatically. Entries are tagged with
+  `seal_ai_config_<fingerprint>`.
+
 ### MCP server (mcp/sdk)
 
 If [mcp/sdk](https://github.com/modelcontextprotocol/php-sdk) is installed (`composer require mcp/sdk`), every site can

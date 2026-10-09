@@ -37,6 +37,16 @@ $GLOBALS['SiteConfiguration']['site']['columns']['sealAiStoreDsn'] = [
     ],
 ];
 
+$GLOBALS['SiteConfiguration']['site']['columns']['sealAiEmbeddingCache'] = [
+    'label' => $lll . 'site.sealAiEmbeddingCache',
+    'description' => $lll . 'site.sealAiEmbeddingCache.description',
+    'config' => [
+        'type' => 'check',
+        'renderType' => 'checkboxToggle',
+        'default' => 1,
+    ],
+];
+
 $GLOBALS['SiteConfiguration']['site']['columns']['sealAiMcpToken'] = [
     'label' => $lll . 'site.sealAiMcpToken',
     'description' => $lll . 'site.sealAiMcpToken.description',
@@ -61,6 +71,6 @@ $GLOBALS['SiteConfiguration']['site']['columns']['sealAiMcpToken'] = [
 
 $GLOBALS['SiteConfiguration']['site']['types']['0']['showitem'] = str_replace(
     ', sealSearchDsn,',
-    ', sealSearchDsn, sealAiPlatformDsn, sealAiChatModel, sealAiStoreDsn, sealAiMcpToken, ',
+    ', sealSearchDsn, sealAiPlatformDsn, sealAiChatModel, sealAiStoreDsn, sealAiEmbeddingCache, sealAiMcpToken, ',
     $GLOBALS['SiteConfiguration']['site']['types']['0']['showitem'],
 );

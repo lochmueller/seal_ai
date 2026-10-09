@@ -12,10 +12,12 @@ use Lochmueller\SealAi\Chat\PlatformChat;
 use Lochmueller\SealAi\Factory\PlatformFactory;
 use Lochmueller\SealAi\Factory\StoreFactory;
 use Lochmueller\SealAi\Integration\Aim\AimFactory;
+use Lochmueller\SealAi\Vectorizer\CachingVectorizer;
 use Symfony\AI\Platform\PlatformInterface;
 use Symfony\AI\Store\Document\VectorizerInterface;
 use Symfony\AI\Store\ManagedStoreInterface;
 use Symfony\AI\Store\StoreInterface;
+use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Site\Entity\Site;
 
 class AiBridgeTest extends AbstractTest
@@ -238,5 +240,54 @@ class AiBridgeTest extends AbstractTest
         $this->expectExceptionCode(1759312002);
 
         $bridge->initialize($site);
+    }
+
+    public function testIndexVectorizerUsesEmbeddingCache(): void
+    {
+        $bridge = $this->createInitializedBridge($this->createStub(FrontendInterface::class), []);
+
+        self::assertInstanceOf(CachingVectorizer::class, $bridge->getIndexVectorizer());
+        self::assertNotInstanceOf(CachingVectorizer::class, $bridge->getVectorizer());
+    }
+
+    public function testIndexVectorizerWithoutCacheIsPlainVectorizer(): void
+    {
+        $bridge = $this->createInitializedBridge(null, []);
+
+        self::assertSame($bridge->getVectorizer(), $bridge->getIndexVectorizer());
+    }
+
+    public function testIndexVectorizerWithDisabledCacheIsPlainVectorizer(): void
+    {
+        $bridge = $this->createInitializedBridge($this->createStub(FrontendInterface::class), ['sealAiEmbeddingCache' => false]);
+
+        self::assertSame($bridge->getVectorizer(), $bridge->getIndexVectorizer());
+    }
+
+    /**
+     * @param array<string, mixed> $additionalConfiguration
+     */
+    private function createInitializedBridge(?FrontendInterface $cache, array $additionalConfiguration): AiBridge
+    {
+        $dsnParser = $this->createStub(DsnParser::class);
+        $dsnParser->method('parse')->willReturn(new DsnDto(scheme: 'openai', user: 'key', query: ['model' => 'my-model']));
+
+        $storeFactory = $this->createStub(StoreFactory::class);
+        $storeFactory->method('fromDsn')->willReturn($this->getStore());
+
+        $platformFactory = $this->createStub(PlatformFactory::class);
+        $platformFactory->method('fromDsn')->willReturn($this->createStub(PlatformInterface::class));
+
+        $site = $this->createStub(Site::class);
+        $site->method('getConfiguration')->willReturn([
+            'sealAiStoreDsn' => 'memory://default',
+            'sealAiPlatformDsn' => 'openai://key@default?model=my-model',
+            ...$additionalConfiguration,
+        ]);
+
+        $bridge = new AiBridge($platformFactory, $storeFactory, $dsnParser, null, $cache);
+        $bridge->initialize($site);
+
+        return $bridge;
     }
 }

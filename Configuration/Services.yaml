@@ -10,3 +10,12 @@ services:
     exclude:
       - '../Classes/Integration/Aim/*'
       - '../Classes/Integration/Mcp/*'
+
+  cache.seal_ai_embedding:
+    class: TYPO3\CMS\Core\Cache\Frontend\FrontendInterface
+    factory: ['@TYPO3\CMS\Core\Cache\CacheManager', 'getCache']
+    arguments: ['seal_ai_embedding']
+
+  Lochmueller\SealAi\AiBridge:
+    arguments:
+      $embeddingCache: '@cache.seal_ai_embedding'

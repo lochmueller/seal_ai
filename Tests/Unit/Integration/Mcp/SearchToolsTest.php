@@ -38,6 +38,7 @@ class SearchToolsTest extends AbstractTest
         $aiBridge = $this->createStub(AiBridge::class);
         $aiBridge->method('getStore')->willReturn($store);
         $aiBridge->method('getVectorizer')->willReturn($vectorizer);
+        $aiBridge->method('getIndexVectorizer')->willReturn($vectorizer);
         $this->aiBridge = $aiBridge;
 
         $this->site = new Site('main', 1, [
