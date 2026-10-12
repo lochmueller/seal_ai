@@ -155,7 +155,7 @@ class PlatformFactory
 
             case 'albert':
                 class_exists(AlbertBridge\Factory::class) or throw new \RuntimeException('Please install symfony/ai-albert-platform to use Albert platform');
-                $baseUrl = $dsn->host ?? '';
+                $baseUrl = $this->buildBaseUrl($dsn, 'https');
                 return AlbertBridge\Factory::createPlatform($apiKey, $baseUrl, $client);
 
             case 'cartesia':

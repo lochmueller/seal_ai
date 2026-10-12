@@ -35,6 +35,19 @@ class AimFactoryTest extends AbstractTest
         (new AimFactory($client))->createVectorizer(new DsnDto(scheme: 'aim', host: 'default'))->vectorize('text');
     }
 
+    public function testCreateVectorizerIgnoresNonScalarQueryValues(): void
+    {
+        $client = $this->createMock(AimClient::class);
+        $client->expects(self::once())
+            ->method('embed')
+            ->with(['text'], '', 0)
+            ->willReturn([[0.5]]);
+
+        $dsn = new DsnDto(scheme: 'aim', host: 'default', query: ['model' => ['a', 'b'], 'dimensions' => 'many']);
+
+        (new AimFactory($client))->createVectorizer($dsn)->vectorize('text');
+    }
+
     public function testCreateChatMapsDefaultToAimDefaultProvider(): void
     {
         $client = $this->createMock(AimClient::class);

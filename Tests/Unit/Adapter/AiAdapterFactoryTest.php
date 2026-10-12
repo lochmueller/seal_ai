@@ -33,7 +33,7 @@ class AiAdapterFactoryTest extends AbstractTest
         $adapter = $this->createStub(AiAdapter::class);
 
         $factory = new AiAdapterFactory($aiBridge, $adapter);
-        $result = $factory->createAdapter(['ai://localhost']);
+        $result = $factory->createAdapter(['scheme' => 'ai', 'host' => 'localhost', 'query' => []]);
 
         self::assertInstanceOf(AdapterInterface::class, $result);
     }
@@ -51,6 +51,20 @@ class AiAdapterFactoryTest extends AbstractTest
         $adapter = $this->createStub(AiAdapter::class);
 
         $factory = new AiAdapterFactory($aiBridge, $adapter);
-        $factory->createAdapter(['ai://localhost']);
+        $factory->createAdapter(['scheme' => 'ai', 'host' => 'localhost', 'query' => []]);
+    }
+
+    public function testCreateAdapterThrowsExceptionWithoutRequest(): void
+    {
+        unset($GLOBALS['TYPO3_REQUEST']);
+
+        $aiBridge = $this->createMock(AiBridge::class);
+        $aiBridge->expects(self::never())->method('initialize');
+
+        $factory = new AiAdapterFactory($aiBridge, $this->createStub(AiAdapter::class));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionCode(1236891232);
+        $factory->createAdapter(['scheme' => 'ai', 'host' => 'localhost', 'query' => []]);
     }
 }
