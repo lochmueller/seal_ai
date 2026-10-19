@@ -13,6 +13,7 @@ use Lochmueller\SealAi\Adapter\Ai\AiSchemaManager;
 use Lochmueller\SealAi\Adapter\Ai\AiSearcher;
 use Lochmueller\SealAi\AiBridge;
 use Lochmueller\SealAi\Tests\Unit\AbstractTest;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
 class AiAdapterTest extends AbstractTest
 {
@@ -51,7 +52,7 @@ class AiAdapterTest extends AbstractTest
         $aiBridge = $this->createStub(AiBridge::class);
         $schemaManager = new AiSchemaManager($aiBridge);
         $indexer = new AiIndexer($aiBridge);
-        $searcher = new AiSearcher($aiBridge);
+        $searcher = new AiSearcher($aiBridge, $this->createStub(EventDispatcherInterface::class));
 
         return new AiAdapter($schemaManager, $indexer, $searcher);
     }

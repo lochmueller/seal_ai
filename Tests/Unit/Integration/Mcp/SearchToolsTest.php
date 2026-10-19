@@ -131,7 +131,7 @@ class SearchToolsTest extends AbstractTest
     {
         $index = (new SchemaBuilder($this->createStub(EventDispatcherInterface::class)))->getPageIndex();
         $engine = new Engine(
-            new AiAdapter(new AiSchemaManager($this->aiBridge), new AiIndexer($this->aiBridge), new AiSearcher($this->aiBridge)),
+            new AiAdapter(new AiSchemaManager($this->aiBridge), new AiIndexer($this->aiBridge), new AiSearcher($this->aiBridge, $this->createStub(EventDispatcherInterface::class))),
             new Schema([SchemaBuilder::DEFAULT_INDEX => $index]),
         );
 

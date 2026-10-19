@@ -10,6 +10,8 @@ use CmsIg\Seal\Search\Result;
 use CmsIg\Seal\Search\Search;
 use CmsIg\Seal\Search\Condition;
 use Lochmueller\SealAi\AiBridge;
+use Lochmueller\SealAi\Event\SealAiSearchEvent;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\AI\Platform\Vector\NullVector;
 use Symfony\AI\Store\Document\TextDocument;
 use Symfony\AI\Store\Document\Transformer\TextTrimTransformer;
@@ -17,7 +19,10 @@ use Symfony\AI\Store\Query\VectorQuery;
 
 class AiSearcher implements SearcherInterface
 {
-    public function __construct(protected AiBridge $aiBridge) {}
+    public function __construct(
+        protected AiBridge $aiBridge,
+        protected EventDispatcherInterface $eventDispatcher,
+    ) {}
 
     public function search(Search $search): Result
     {
@@ -34,15 +39,23 @@ class AiSearcher implements SearcherInterface
             ),
         ];
 
-        // @todo add Limiter
-
 
         $transformers = [
             new TextTrimTransformer(),
         ];
-
         foreach ($transformers as $transformer) {
-            $documents = $transformer->transform($documents);
+            $documents = [...$transformer->transform($documents)];
+        }
+
+        $event = new SealAiSearchEvent($search, $documents);
+        $this->eventDispatcher->dispatch($event);
+        $eventResult = $event->getResult();
+        if ($eventResult !== null) {
+            return $eventResult;
+        }
+        $documents = $event->getDocuments();
+        if ($documents === []) {
+            return $this->emptyResult();
         }
 
         $vectorDocuments = $this->aiBridge->getCachedVectorizer()->vectorize($documents);

@@ -209,17 +209,17 @@ Tools (all read-only, bound to the site and language of the requested URL):
 
 Both factories support the `event://` DSN scheme, allowing you to provide custom platform or store implementations via PSR-14 event listeners.
 
-- `Lochmueller\SealAi\Event\PlatformFactoryEvent` — dispatched for `event://` platform DSN
-- `Lochmueller\SealAi\Event\StoreFactoryEvent` — dispatched for `event://` store DSN
+- `Lochmueller\SealAi\Event\CreatePlatformEvent` — dispatched for `event://` platform DSN
+- `Lochmueller\SealAi\Event\CreateStoreEvent` — dispatched for `event://` store DSN
 
 Example event listener:
 
 ```php
-use Lochmueller\SealAi\Event\PlatformFactoryEvent;
+use Lochmueller\SealAi\Event\CreatePlatformEvent;
 
 final class CustomPlatformListener
 {
-    public function __invoke(PlatformFactoryEvent $event): void
+    public function __invoke(CreatePlatformEvent $event): void
     {
         $dsn = $event->getDsn();
         // Build your custom platform...
@@ -227,6 +227,57 @@ final class CustomPlatformListener
     }
 }
 ```
+
+### Modifying the search
+
+`Lochmueller\SealAi\Event\SealAiSearchEvent` is dispatched on every search, before the search term is vectorized
+(embedding request) and the store is queried. Listeners can
+
+- read the SEAL search (`getSearch()`),
+- change the documents that are vectorized, e.g. rewrite the search term (`getDocuments()` / `setDocuments()`),
+- skip the AI search and return an own result (`setResult()`) or an empty result (`cancel()`).
+
+#### Rate limiting (TYPO3 v14)
+
+Every search, that is not answered by the embedding cache, is a (paid) request to the AI platform. With the rate
+limiter factory of TYPO3 v14, the event can be used to limit the searches, e.g. 100 searches per IP in a sliding window:
+
+```php
+use Lochmueller\SealAi\Event\SealAiSearchEvent;
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
+use TYPO3\CMS\Core\RateLimiter\RateLimiterFactoryInterface;
+
+#[AsEventListener('my-extension/seal-ai-search-rate-limiter')]
+final readonly class SealAiSearchRateLimiter
+{
+    public function __construct(
+        private RateLimiterFactoryInterface $rateLimiterFactory,
+    ) {}
+
+    public function __invoke(SealAiSearchEvent $event): void
+    {
+        $request = $GLOBALS['TYPO3_REQUEST'] ?? null;
+        if (!$request instanceof ServerRequestInterface) {
+            return; // CLI, scheduler: no limit
+        }
+
+        $limiter = $this->rateLimiterFactory->createRequestBasedLimiter($request, [
+            'id' => 'seal-ai-search',
+            'policy' => 'sliding_window',
+            'limit' => 100,
+            'interval' => '1 hour',
+        ]);
+
+        if (!$limiter->consume()->isAccepted()) {
+            $event->cancel();
+        }
+    }
+}
+```
+
+The limiter state is stored via the TYPO3 caching framework. The configuration can be overridden per instance via
+`$GLOBALS['TYPO3_CONF_VARS']['SYS']['rateLimiter']['seal-ai-search']`.
 
 ## Architecture
 
