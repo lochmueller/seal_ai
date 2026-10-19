@@ -8,7 +8,7 @@
                 <source>AI Platform DSN</source>
             </trans-unit>
             <trans-unit id="site.sealAiPlatformDsn.description">
-                <source>Configure the AI platform via DSN. Examples check placeholder. Use ai://aim to route requests through EXT:aim.</source>
+                <source>Configure the AI platform via DSN. Examples check placeholder. Use ai://aim to route requests through EXT:aim. Important: The model must be an embedding model (e.g. text-embedding-3-small), not a chat/LLM model.</source>
             </trans-unit>
             <trans-unit id="site.sealAiChatModel">
                 <source>AI Chat Model</source>

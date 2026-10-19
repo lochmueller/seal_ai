@@ -20,7 +20,7 @@ use Symfony\AI\Store\Query\VectorQuery;
 class AiSearcher implements SearcherInterface
 {
     public function __construct(
-        protected AiBridge $aiBridge,
+        protected AiBridge                 $aiBridge,
         protected EventDispatcherInterface $eventDispatcher,
     ) {}
 
@@ -58,7 +58,7 @@ class AiSearcher implements SearcherInterface
             return $this->emptyResult();
         }
 
-        $vectorDocuments = $this->aiBridge->getCachedVectorizer()->vectorize($documents);
+        $vectorDocuments = $this->aiBridge->getVectorizer()->vectorize($documents);
 
         $vector = $vectorDocuments[0]->getVector();
         if ($vector instanceof NullVector) {

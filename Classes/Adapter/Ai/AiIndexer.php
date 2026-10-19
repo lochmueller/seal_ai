@@ -9,15 +9,17 @@ use CmsIg\Seal\Schema\Index;
 use CmsIg\Seal\Task\SyncTask;
 use CmsIg\Seal\Task\TaskInterface;
 use Lochmueller\SealAi\AiBridge;
+use Lochmueller\SealAi\Document\Transformer\TextSplitTransformer;
 use Symfony\AI\Store\Document\Metadata;
 use Symfony\AI\Store\Document\TextDocument;
-use Symfony\AI\Store\Document\Transformer\TextSplitTransformer;
 use Symfony\AI\Store\Document\Transformer\TextTrimTransformer;
 use Symfony\AI\Store\Indexer\DocumentIndexer;
 use Symfony\AI\Store\Indexer\DocumentProcessor;
 
 class AiIndexer implements IndexerInterface
 {
+    public const int MAX_ITEMS_SPLITTER = 10;
+
     public function __construct(protected AiBridge $aiBridge) {}
 
     public function save(Index $index, array $document, array $options = []): ?TaskInterface
@@ -26,8 +28,12 @@ class AiIndexer implements IndexerInterface
 
         $transformers = [
             new TextTrimTransformer(),
+            new TextSplitTransformer(
+                maxItems: self::MAX_ITEMS_SPLITTER,
+                chunkSize: 15000,
+                overlap: 10000
+            ),
         ];
-        // @todo // TextSplitTransformer::class for Chunk Size reduction
 
         $processor = new DocumentProcessor(
             $this->aiBridge->getCachedVectorizer(),
@@ -47,7 +53,14 @@ class AiIndexer implements IndexerInterface
 
     public function delete(Index $index, string $identifier, array $options = []): ?TaskInterface
     {
-        $this->aiBridge->getStore()->remove([$identifier]);
+        $removeIdentifiers = [$identifier];
+
+        // Remove splitter items by TextSplitTransformer
+        for ($i = 0; $i < self::MAX_ITEMS_SPLITTER; $i++) {
+            $removeIdentifiers[] = $identifier . '-' . $i;
+        }
+
+        $this->aiBridge->getStore()->remove($removeIdentifiers);
 
         return new SyncTask(null);
     }
@@ -61,5 +74,14 @@ class AiIndexer implements IndexerInterface
             $this->save($index, $saveDocument);
         }
         return new SyncTask(null);
+    }
+
+    /**
+     * @param string $identifier
+     * @return void
+     */
+    public function getRemove(string $identifier): void
+    {
+        $this->aiBridge->getStore()->remove([$identifier]);
     }
 }
