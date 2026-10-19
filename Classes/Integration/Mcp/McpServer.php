@@ -41,9 +41,6 @@ class McpServer
             $language = $site->getDefaultLanguage();
         }
 
-        // The SEAL adapter factories resolve the site via the global request
-        $GLOBALS['TYPO3_REQUEST'] = $request;
-
         $transport = new StreamableHttpTransport(
             $request,
             $this->responseFactory,

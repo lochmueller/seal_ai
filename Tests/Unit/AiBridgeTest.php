@@ -189,7 +189,7 @@ class AiBridgeTest extends AbstractTest
 
     public function testInitializeUsesAimFactoryForAimScheme(): void
     {
-        $aimDsn = new DsnDto(scheme: 'aim', host: 'default', query: ['model' => 'openai:text-embedding-3-small']);
+        $aimDsn = new DsnDto(scheme: 'ai', host: 'aim', query: ['model' => 'openai:text-embedding-3-small']);
         $vectorizer = $this->createStub(VectorizerInterface::class);
         $chat = $this->createStub(ChatInterface::class);
 
@@ -209,7 +209,7 @@ class AiBridgeTest extends AbstractTest
         $site = $this->createStub(Site::class);
         $site->method('getConfiguration')->willReturn([
             'sealAiStoreDsn' => 'memory://default',
-            'sealAiPlatformDsn' => 'aim://default?model=openai:text-embedding-3-small',
+            'sealAiPlatformDsn' => 'ai://aim?model=openai:text-embedding-3-small',
             'sealAiChatModel' => 'default',
         ]);
 
@@ -223,7 +223,7 @@ class AiBridgeTest extends AbstractTest
     public function testInitializeThrowsExceptionForAimSchemeWithoutAim(): void
     {
         $dsnParser = $this->createStub(DsnParser::class);
-        $dsnParser->method('parse')->willReturn(new DsnDto(scheme: 'aim', host: 'default'));
+        $dsnParser->method('parse')->willReturn(new DsnDto(scheme: 'ai', host: 'aim'));
 
         $storeFactory = $this->createStub(StoreFactory::class);
         $storeFactory->method('fromDsn')->willReturn($this->getStore());
@@ -231,7 +231,7 @@ class AiBridgeTest extends AbstractTest
         $site = $this->createStub(Site::class);
         $site->method('getConfiguration')->willReturn([
             'sealAiStoreDsn' => 'memory://default',
-            'sealAiPlatformDsn' => 'aim://default',
+            'sealAiPlatformDsn' => 'ai://aim',
         ]);
 
         $bridge = new AiBridge($this->createStub(PlatformFactory::class), $storeFactory, $dsnParser);

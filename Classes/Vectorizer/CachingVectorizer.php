@@ -14,7 +14,7 @@ use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 
 /**
  * Content-hash embedding cache: unchanged texts are answered from the TYPO3 caching framework,
- * only cache misses are passed to the wrapped vectorizer (platform DSN or aim://).
+ * only cache misses are passed to the wrapped vectorizer (platform DSN or ai://aim).
  */
 readonly class CachingVectorizer implements VectorizerInterface
 {

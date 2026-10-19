@@ -92,7 +92,7 @@ class AiBridge
 
         // Platform
         $dsnDto = $this->dsnParser->parse($platformDsn);
-        if ($dsnDto->scheme === 'aim') {
+        if ($this->isAimDsn($dsnDto)) {
             $this->initializeAim($dsnDto, $chatModel);
         } else {
             $this->initializePlatform($dsnDto, $chatModel);
@@ -120,13 +120,21 @@ class AiBridge
     {
         if ($this->aimFactory === null) {
             throw new \RuntimeException(
-                'Please install b13/aim (EXT:aim) to use the "aim://" platform DSN',
+                'Please install b13/aim (EXT:aim) to use the "ai://aim" platform DSN',
                 1759312002
             );
         }
 
         $this->vectorizer = $this->aimFactory->createVectorizer($dsnDto);
         $this->chat = $chatModel !== '' ? $this->aimFactory->createChat($chatModel) : null;
+    }
+
+    /**
+     * AiM is addressed via "ai://aim" (scheme "ai", host "aim").
+     */
+    protected function isAimDsn(DsnDto $dsnDto): bool
+    {
+        return $dsnDto->scheme === 'ai' && $dsnDto->host === 'aim';
     }
 
     protected function createIndexVectorizer(DsnDto $dsnDto, bool $cacheEnabled): VectorizerInterface
@@ -142,7 +150,7 @@ class AiBridge
             $this->vectorizer,
             $this->embeddingCache,
             CachingVectorizer::createFingerprint(
-                $dsnDto->scheme,
+                $this->isAimDsn($dsnDto) ? 'aim' : $dsnDto->scheme,
                 \is_string($model) ? $model : '',
                 \is_numeric($dimensions) ? (int) $dimensions : 0,
             ),

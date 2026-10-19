@@ -19,7 +19,7 @@ class AimFactoryTest extends AbstractTest
             ->with(['text'], 'openai:text-embedding-3-small', 768)
             ->willReturn([[0.5]]);
 
-        $dsn = new DsnDto(scheme: 'aim', host: 'default', query: ['model' => 'openai:text-embedding-3-small', 'dimensions' => '768']);
+        $dsn = new DsnDto(scheme: 'ai', host: 'aim', query: ['model' => 'openai:text-embedding-3-small', 'dimensions' => '768']);
 
         (new AimFactory($client))->createVectorizer($dsn)->vectorize('text');
     }
@@ -32,7 +32,7 @@ class AimFactoryTest extends AbstractTest
             ->with(['text'], '', 0)
             ->willReturn([[0.5]]);
 
-        (new AimFactory($client))->createVectorizer(new DsnDto(scheme: 'aim', host: 'default'))->vectorize('text');
+        (new AimFactory($client))->createVectorizer(new DsnDto(scheme: 'ai', host: 'aim'))->vectorize('text');
     }
 
     public function testCreateVectorizerIgnoresNonScalarQueryValues(): void
@@ -43,7 +43,7 @@ class AimFactoryTest extends AbstractTest
             ->with(['text'], '', 0)
             ->willReturn([[0.5]]);
 
-        $dsn = new DsnDto(scheme: 'aim', host: 'default', query: ['model' => ['a', 'b'], 'dimensions' => 'many']);
+        $dsn = new DsnDto(scheme: 'ai', host: 'aim', query: ['model' => ['a', 'b'], 'dimensions' => 'many']);
 
         (new AimFactory($client))->createVectorizer($dsn)->vectorize('text');
     }

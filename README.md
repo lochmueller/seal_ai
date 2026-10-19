@@ -102,14 +102,14 @@ middleware pipeline (request logging, cost tracking, budgets, fallback) and prov
 AiM backend module.
 
 ```
-aim://default
-aim://default?model=openai:text-embedding-3-small&dimensions=768
+ai://aim
+ai://aim?model=openai:text-embedding-3-small&dimensions=768
 ```
 
 - `model` — AiM provider notation for the embedding requests (optional, defaults to the AiM default embedding provider)
 - `dimensions` — requested vector dimensions (optional)
 
-With an `aim://` platform DSN, `sealAiChatModel` is an AiM provider notation as well (e.g. `anthropic:claude-sonnet-4`).
+With an `ai://aim` platform DSN, `sealAiChatModel` is an AiM provider notation as well (e.g. `anthropic:claude-sonnet-4`).
 Use `default` to use the AiM default conversation provider. Leave it empty to disable SGE.
 
 AiM does not provide a vector store, so `sealAiStoreDsn` has to be configured as usual.

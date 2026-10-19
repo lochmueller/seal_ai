@@ -14,7 +14,7 @@
   ],
   "require": {
     "php": "^8.3",
-    "lochmueller/seal": "^2.0",
+    "lochmueller/seal": "~2.0.3",
     "symfony/ai-platform": "^0.14",
     "symfony/ai-store": "^0.14",
     "typo3/cms-core": "^13.4 || ^14.3"
@@ -90,7 +90,7 @@
     "mcp/sdk": "^0.8"
   },
   "suggest": {
-    "b13/aim": "Use AiM (EXT:aim) for embeddings and search summaries via the aim:// platform DSN (logging, budgets, provider management)",
+    "b13/aim": "Use AiM (EXT:aim) for embeddings and search summaries via the ai://aim platform DSN (logging, budgets, provider management)",
     "mcp/sdk": "Provide a read-only MCP server (search & retrieve tools with token authentication) for each site at <site base>/seal/mcp"
   },
   "autoload": {

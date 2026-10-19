@@ -6,6 +6,7 @@ namespace Lochmueller\SealAi\Adapter\Ai;
 
 use CmsIg\Seal\Adapter\AdapterFactoryInterface;
 use CmsIg\Seal\Adapter\AdapterInterface;
+use Lochmueller\Seal\Engine\EngineFactory;
 use Lochmueller\SealAi\AiBridge;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
@@ -27,6 +28,11 @@ class AiAdapterFactory implements AdapterFactoryInterface
 
     public function createAdapter(array $dsn): AdapterInterface
     {
+        if (EngineFactory::$currentSite instanceof Site) {
+            $this->aiBridge->initialize(EngineFactory::$currentSite);
+            return $this->adapter;
+        }
+
         $request = $GLOBALS['TYPO3_REQUEST'] ?? null;
         $request instanceof ServerRequestInterface or throw new \RuntimeException('No TYPO3 request available for AI adapter build', 1236891232);
 

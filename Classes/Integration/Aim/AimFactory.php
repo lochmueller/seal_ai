@@ -24,8 +24,8 @@ readonly class AimFactory
 
     /**
      * DSN Examples:
-     * aim://default
-     * aim://default?model=openai:text-embedding-3-small&dimensions=768
+     * ai://aim
+     * ai://aim?model=openai:text-embedding-3-small&dimensions=768
      */
     public function createVectorizer(DsnDto $dsn): VectorizerInterface
     {
