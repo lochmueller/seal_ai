@@ -12,6 +12,7 @@ use CmsIg\Seal\Search\Condition;
 use Lochmueller\SealAi\AiBridge;
 use Symfony\AI\Platform\Vector\NullVector;
 use Symfony\AI\Store\Document\TextDocument;
+use Symfony\AI\Store\Document\Transformer\TextTrimTransformer;
 use Symfony\AI\Store\Query\VectorQuery;
 
 class AiSearcher implements SearcherInterface
@@ -33,9 +34,18 @@ class AiSearcher implements SearcherInterface
             ),
         ];
 
-        // @todo add Limiter && Cache on search term verctorizer
+        // @todo add Limiter
 
-        $vectorDocuments = $this->aiBridge->getVectorizer()->vectorize($documents);
+
+        $transformers = [
+            new TextTrimTransformer(),
+        ];
+
+        foreach ($transformers as $transformer) {
+            $documents = $transformer->transform($documents);
+        }
+
+        $vectorDocuments = $this->aiBridge->getCachedVectorizer()->vectorize($documents);
 
         $vector = $vectorDocuments[0]->getVector();
         if ($vector instanceof NullVector) {
