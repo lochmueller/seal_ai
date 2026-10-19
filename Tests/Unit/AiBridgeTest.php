@@ -242,26 +242,26 @@ class AiBridgeTest extends AbstractTest
         $bridge->initialize($site);
     }
 
-    public function testIndexVectorizerUsesEmbeddingCache(): void
+    public function testCachedVectorizerUsesEmbeddingCache(): void
     {
         $bridge = $this->createInitializedBridge($this->createStub(FrontendInterface::class), []);
 
-        self::assertInstanceOf(CachingVectorizer::class, $bridge->getIndexVectorizer());
+        self::assertInstanceOf(CachingVectorizer::class, $bridge->getCachedVectorizer());
         self::assertNotInstanceOf(CachingVectorizer::class, $bridge->getVectorizer());
     }
 
-    public function testIndexVectorizerWithoutCacheIsPlainVectorizer(): void
+    public function testCachedVectorizerWithoutCacheIsPlainVectorizer(): void
     {
         $bridge = $this->createInitializedBridge(null, []);
 
-        self::assertSame($bridge->getVectorizer(), $bridge->getIndexVectorizer());
+        self::assertSame($bridge->getVectorizer(), $bridge->getCachedVectorizer());
     }
 
-    public function testIndexVectorizerWithDisabledCacheIsPlainVectorizer(): void
+    public function testCachedVectorizerWithDisabledCacheIsPlainVectorizer(): void
     {
         $bridge = $this->createInitializedBridge($this->createStub(FrontendInterface::class), ['sealAiEmbeddingCache' => false]);
 
-        self::assertSame($bridge->getVectorizer(), $bridge->getIndexVectorizer());
+        self::assertSame($bridge->getVectorizer(), $bridge->getCachedVectorizer());
     }
 
     /**

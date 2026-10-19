@@ -30,7 +30,7 @@ class AiIndexer implements IndexerInterface
         // @todo // TextSplitTransformer::class for Chunk Size reduction
 
         $processor = new DocumentProcessor(
-            $this->aiBridge->getIndexVectorizer(),
+            $this->aiBridge->getCachedVectorizer(),
             $this->aiBridge->getStore(),
             transformers: $transformers
         );

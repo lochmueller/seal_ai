@@ -23,7 +23,7 @@ class AiBridge
 {
     protected VectorizerInterface $vectorizer;
 
-    protected VectorizerInterface $indexVectorizer;
+    protected VectorizerInterface $cachedVectorizer;
 
     protected ?ChatInterface $chat = null;
 
@@ -50,9 +50,9 @@ class AiBridge
     /**
      * Vectorizer for indexing: wrapped in the embedding cache (if enabled), so unchanged content costs no tokens.
      */
-    public function getIndexVectorizer(): VectorizerInterface
+    public function getCachedVectorizer(): VectorizerInterface
     {
-        return $this->indexVectorizer; // @todo rename to "cachedVectorizer" umbennen. Ggf. auch in der Search benutzen.
+        return $this->cachedVectorizer;
     }
 
     /**
@@ -98,7 +98,7 @@ class AiBridge
             $this->initializePlatform($dsnDto, $chatModel);
         }
 
-        $this->indexVectorizer = $this->createIndexVectorizer($dsnDto, (bool) ($config['sealAiEmbeddingCache'] ?? true));
+        $this->cachedVectorizer = $this->createCachedVectorizer($dsnDto, (bool) ($config['sealAiEmbeddingCache'] ?? true));
     }
 
     protected function initializePlatform(DsnDto $dsnDto, string $chatModel): void
@@ -137,7 +137,7 @@ class AiBridge
         return $dsnDto->scheme === 'ai' && $dsnDto->host === 'aim';
     }
 
-    protected function createIndexVectorizer(DsnDto $dsnDto, bool $cacheEnabled): VectorizerInterface
+    protected function createCachedVectorizer(DsnDto $dsnDto, bool $cacheEnabled): VectorizerInterface
     {
         if ($this->embeddingCache === null || !$cacheEnabled) {
             return $this->vectorizer;
