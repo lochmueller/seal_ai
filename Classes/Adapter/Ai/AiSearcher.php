@@ -14,7 +14,6 @@ use Lochmueller\SealAi\Event\SealAiSearchEvent;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\AI\Platform\Vector\NullVector;
 use Symfony\AI\Store\Document\TextDocument;
-use Symfony\AI\Store\Document\Transformer\TextTrimTransformer;
 use Symfony\AI\Store\Query\VectorQuery;
 
 class AiSearcher implements SearcherInterface
@@ -26,7 +25,7 @@ class AiSearcher implements SearcherInterface
 
     public function search(Search $search): Result
     {
-        $searchTerm = $this->recursiveFindSearchTerm($search->filters);
+        $searchTerm = trim($this->recursiveFindSearchTerm($search->filters));
 
         if ($searchTerm === '') {
             return $this->emptyResult();
@@ -38,14 +37,6 @@ class AiSearcher implements SearcherInterface
                 content: $searchTerm,
             ),
         ];
-
-
-        $transformers = [
-            new TextTrimTransformer(),
-        ];
-        foreach ($transformers as $transformer) {
-            $documents = [...$transformer->transform($documents)];
-        }
 
         $event = new SealAiSearchEvent($search, $documents);
         $this->eventDispatcher->dispatch($event);

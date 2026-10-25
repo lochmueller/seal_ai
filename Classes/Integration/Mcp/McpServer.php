@@ -48,7 +48,7 @@ class McpServer
             $this->logger,
             [
                 new CorsMiddleware(),
-                new DnsRebindingProtectionMiddleware([$request->getUri()->getHost(), 'localhost', '127.0.0.1', '[::1]'], $this->responseFactory, $this->streamFactory),
+                new DnsRebindingProtectionMiddleware([$request->getUri()->getHost(), 'localhost', '127.0.0.1', '[::1]'], responseFactory: $this->responseFactory, streamFactory: $this->streamFactory),
             ],
         );
 

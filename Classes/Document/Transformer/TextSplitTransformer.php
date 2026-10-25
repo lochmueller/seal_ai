@@ -37,22 +37,30 @@ class TextSplitTransformer implements TransformerInterface
         }
 
         foreach ($documents as $document) {
-            if (mb_strlen($document->getContent()) <= $chunkSize) {
+            $text = $document->getContent();
+            if (!\is_string($text)) {
+                // Non-text content (e.g. images) cannot be split and is passed through unchanged.
+                yield $document;
+
+                continue;
+            }
+
+            if (mb_strlen($text) <= $chunkSize) {
                 $metadata = new Metadata([
                     ...$document->getMetadata(),
-                    Metadata::KEY_TEXT => $document->getContent(),
+                    Metadata::KEY_TEXT => $text,
                 ]);
 
-                yield new TextDocument($document->getId(), $document->getContent(), $metadata);
+                yield new TextDocument($document->getId(), $text, $metadata);
 
                 continue;
             }
 
             $currentChuckSize = $chunkSize;
-            $text = $document->getContent();
             $length = mb_strlen($text);
             if ($length / $chunkSize > $this->maxItems) {
-                $currentChuckSize = ceil($length / $this->maxItems);
+                // Integer ceil($length / $maxItems)
+                $currentChuckSize = intdiv($length + $this->maxItems - 1, $this->maxItems);
             }
 
             $start = 0;
