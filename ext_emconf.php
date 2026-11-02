@@ -4,7 +4,7 @@
 $EM_CONF[$_EXTKEY] = [
     'title' => 'SEAL Search AI',
     'description' => 'SEAL Search AI - Vector based search based on EXT:seal',
-    'version' => '2.0.0',
+    'version' => '2.0.1',
     'category' => 'fe',
     'constraints' => [
         'depends' => [
