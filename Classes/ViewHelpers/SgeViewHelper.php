@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Lochmueller\SealAi\ViewHelpers;
 
-use Lochmueller\SealAi\AiBridge;
+use Lochmueller\SealAi\Factory\AiBridgeFactory;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
@@ -13,7 +13,7 @@ class SgeViewHelper extends AbstractViewHelper
 {
     protected $escapeOutput = false;
 
-    public function __construct(private readonly AiBridge $aiBridge) {}
+    public function __construct(private readonly AiBridgeFactory $bridgeFactory) {}
 
     public function initializeArguments(): void
     {
@@ -40,8 +40,7 @@ class SgeViewHelper extends AbstractViewHelper
             return '';
         }
 
-        $this->aiBridge->initialize($site);
-        $chat = $this->aiBridge->getChat();
+        $chat = $this->bridgeFactory->forSite($site)->getChat();
         if ($chat === null) {
             return '';
         }

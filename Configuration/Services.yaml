@@ -6,8 +6,14 @@ services:
 
   Lochmueller\SealAi\:
     resource: '../Classes/*'
-    # Registered in Services.php, only if the optional packages are installed
     exclude:
+      # Built per site by the AiBridgeFactory / AiAdapterFactory, never shared services
+      - '../Classes/AiBridge.php'
+      - '../Classes/Adapter/Ai/AiAdapter.php'
+      - '../Classes/Adapter/Ai/AiIndexer.php'
+      - '../Classes/Adapter/Ai/AiSchemaManager.php'
+      - '../Classes/Adapter/Ai/AiSearcher.php'
+      # Registered in Services.php, only if the optional packages are installed
       - '../Classes/Integration/Aim/*'
       - '../Classes/Integration/Mcp/*'
 
@@ -16,6 +22,6 @@ services:
     factory: ['@TYPO3\CMS\Core\Cache\CacheManager', 'getCache']
     arguments: ['seal_ai_embedding']
 
-  Lochmueller\SealAi\AiBridge:
+  Lochmueller\SealAi\Factory\AiBridgeFactory:
     arguments:
       $embeddingCache: '@cache.seal_ai_embedding'

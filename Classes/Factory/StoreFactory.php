@@ -84,18 +84,18 @@ class StoreFactory
 
             case 'mariadb':
                 class_exists(MariaDbBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-maria-db-store to use MariaDB store');
-                $typo3Connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('tt_content');
                 $tableName = $this->queryString($dsn, 'tableName', 'tx_sealai_data');
                 $indexName = $this->queryString($dsn, 'indexName', 'embedding');
                 $vectorFieldName = $this->queryString($dsn, 'vectorFieldName', 'embedding');
+                $typo3Connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableName);
                 return MariaDbBridge\Store::fromDbal($typo3Connection, $tableName, $indexName, $vectorFieldName);
 
             case 'postgres':
             case 'postgresql':
                 class_exists(PostgresBridge\Store::class) or throw new \RuntimeException('Please install symfony/ai-postgres-store to use PostgreSQL store');
-                $typo3Connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('tt_content');
                 $tableName = $this->queryString($dsn, 'tableName', 'tx_sealai_data');
                 $vectorFieldName = $this->queryString($dsn, 'vectorFieldName', 'embedding');
+                $typo3Connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($tableName);
                 return PostgresBridge\StoreFactory::createStoreFromDbal($typo3Connection, $tableName, $vectorFieldName);
 
             case 'qdrant':

@@ -174,7 +174,7 @@ seal_ai/
 ├── Classes/                    # PHP source code
 │   ├── Adapter/Ai/            # SEAL adapter implementation
 │   ├── Factory/               # Factory classes
-│   └── AiBridge.php           # Main bridge class
+│   └── AiBridge.php           # Store/vectorizer/chat of one site (built by Factory/AiBridgeFactory)
 ├── Configuration/
 │   └── Services.yaml          # Symfony DI configuration
 ├── Tests/

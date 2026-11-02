@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Lochmueller\SealAi\Tests\Unit\ViewHelpers;
 
 use Lochmueller\SealAi\AiBridge;
+use Lochmueller\SealAi\Factory\AiBridgeFactory;
 use Lochmueller\SealAi\Chat\ChatInterface;
 use Lochmueller\SealAi\Tests\Unit\AbstractTest;
 use Lochmueller\SealAi\ViewHelpers\SgeViewHelper;
@@ -17,26 +18,26 @@ class SgeViewHelperTest extends AbstractTest
 {
     public function testRenderReturnsEmptyStringWithoutItems(): void
     {
-        $bridge = $this->createMock(AiBridge::class);
-        $bridge->expects(self::never())->method('initialize');
+        $bridgeFactory = $this->createMock(AiBridgeFactory::class);
+        $bridgeFactory->expects(self::never())->method('forSite');
 
-        self::assertSame('', $this->render($bridge, [], $this->createSite('gpt-4o-mini')));
+        self::assertSame('', $this->render($bridgeFactory, [], $this->createSite('gpt-4o-mini')));
     }
 
     public function testRenderReturnsEmptyStringWithoutChatModel(): void
     {
-        $bridge = $this->createMock(AiBridge::class);
-        $bridge->expects(self::never())->method('initialize');
+        $bridgeFactory = $this->createMock(AiBridgeFactory::class);
+        $bridgeFactory->expects(self::never())->method('forSite');
 
-        self::assertSame('', $this->render($bridge, [['title' => 'A', 'content' => 'B']], $this->createSite('')));
+        self::assertSame('', $this->render($bridgeFactory, [['title' => 'A', 'content' => 'B']], $this->createSite('')));
     }
 
     public function testRenderReturnsEmptyStringWithoutSite(): void
     {
-        $bridge = $this->createMock(AiBridge::class);
-        $bridge->expects(self::never())->method('initialize');
+        $bridgeFactory = $this->createMock(AiBridgeFactory::class);
+        $bridgeFactory->expects(self::never())->method('forSite');
 
-        self::assertSame('', $this->render($bridge, [['title' => 'A', 'content' => 'B']], null));
+        self::assertSame('', $this->render($bridgeFactory, [['title' => 'A', 'content' => 'B']], null));
     }
 
     public function testRenderReturnsSummaryWrappedInContainer(): void
@@ -53,9 +54,11 @@ class SgeViewHelperTest extends AbstractTest
             ->willReturn('<p>Summary</p>');
 
         $site = $this->createSite('gpt-4o-mini');
-        $bridge = $this->createMock(AiBridge::class);
-        $bridge->expects(self::once())->method('initialize')->with($site);
+        $bridge = $this->createStub(AiBridge::class);
         $bridge->method('getChat')->willReturn($chat);
+
+        $bridgeFactory = $this->createMock(AiBridgeFactory::class);
+        $bridgeFactory->expects(self::once())->method('forSite')->with($site)->willReturn($bridge);
 
         $items = [
             ['title' => 'First', 'content' => 'Lorem'],
@@ -63,7 +66,7 @@ class SgeViewHelperTest extends AbstractTest
             ['title' => 'Third', 'content' => 'Ipsum'],
         ];
 
-        self::assertSame('<div class="seal-ai-sge"><p>Summary</p></div>', $this->render($bridge, $items, $site));
+        self::assertSame('<div class="seal-ai-sge"><p>Summary</p></div>', $this->render($bridgeFactory, $items, $site));
     }
 
     public function testRenderReturnsEmptyStringWhenChatFails(): void
@@ -71,24 +74,29 @@ class SgeViewHelperTest extends AbstractTest
         $chat = $this->createStub(ChatInterface::class);
         $chat->method('complete')->willThrowException(new \RuntimeException('API down'));
 
-        $bridge = $this->createStub(AiBridge::class);
-        $bridge->method('getChat')->willReturn($chat);
-
-        self::assertSame('', $this->render($bridge, [['title' => 'A', 'content' => 'B']], $this->createSite('gpt-4o-mini')));
+        self::assertSame('', $this->render($this->createBridgeFactory($chat), [['title' => 'A', 'content' => 'B']], $this->createSite('gpt-4o-mini')));
     }
 
     public function testRenderReturnsEmptyStringWithoutChat(): void
     {
-        $bridge = $this->createStub(AiBridge::class);
-        $bridge->method('getChat')->willReturn(null);
+        self::assertSame('', $this->render($this->createBridgeFactory(null), [['title' => 'A', 'content' => 'B']], $this->createSite('gpt-4o-mini')));
+    }
 
-        self::assertSame('', $this->render($bridge, [['title' => 'A', 'content' => 'B']], $this->createSite('gpt-4o-mini')));
+    private function createBridgeFactory(?ChatInterface $chat): AiBridgeFactory
+    {
+        $bridge = $this->createStub(AiBridge::class);
+        $bridge->method('getChat')->willReturn($chat);
+
+        $bridgeFactory = $this->createStub(AiBridgeFactory::class);
+        $bridgeFactory->method('forSite')->willReturn($bridge);
+
+        return $bridgeFactory;
     }
 
     /**
      * @param array<mixed> $items
      */
-    private function render(AiBridge $bridge, array $items, ?Site $site): string
+    private function render(AiBridgeFactory $bridgeFactory, array $items, ?Site $site): string
     {
         $renderingContext = new RenderingContext();
         $renderingContext->setAttribute(
@@ -96,7 +104,7 @@ class SgeViewHelperTest extends AbstractTest
             (new ServerRequest('https://example.com/'))->withAttribute('site', $site),
         );
 
-        $viewHelper = new SgeViewHelper($bridge);
+        $viewHelper = new SgeViewHelper($bridgeFactory);
         $viewHelper->setRenderingContext($renderingContext);
         $viewHelper->setArguments(['items' => $items]);
 

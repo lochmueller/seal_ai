@@ -235,7 +235,7 @@ class StoreFactoryTest extends AbstractTest
         $connectionPool = $this->createMock(ConnectionPool::class);
         $connectionPool->expects(self::once())
             ->method('getConnectionForTable')
-            ->with('tt_content')
+            ->with('my_table')
             ->willReturn($connection);
         GeneralUtility::addInstance(ConnectionPool::class, $connectionPool);
 

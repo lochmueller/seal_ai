@@ -285,8 +285,9 @@ The limiter state is stored via the TYPO3 caching framework. The configuration c
 
 The extension implements the `CmsIg\Seal\Adapter\AdapterInterface` with these components:
 
-- **AiAdapterFactory** — registered as SEAL adapter factory for the `ai://` scheme, initializes the bridge from the current site configuration
-- **AiBridge** — central service that holds the initialized platform, store, and vectorizer
+- **AiAdapterFactory** — registered as SEAL adapter factory for the `ai://` scheme, builds one adapter per site
+- **AiBridgeFactory** — builds the platform, store, vectorizer and chat from the site configuration, one bridge per site
+- **AiBridge** — immutable store, vectorizer and chat of exactly one site
 - **AiSchemaManager** — manages index creation/deletion in the vector store
 - **AiIndexer** — vectorizes documents and stores them; handles save, delete, and bulk operations
 - **AiSearcher** — performs semantic search by vectorizing the query and querying the store
